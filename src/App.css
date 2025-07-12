@@ -13,6 +13,11 @@
   margin-bottom: 30px;
 }
 
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
 .app-header h1 {
   margin: 0;
   color: #333;
@@ -36,6 +41,24 @@
 .create-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.sample-btn {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.sample-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
 }
 
 .app-main {
@@ -72,6 +95,17 @@
   
   .app-header h1 {
     font-size: 24px;
+  }
+  
+  .header-buttons {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .create-btn,
+  .sample-btn {
+    width: 100%;
   }
   
   .cards-grid {

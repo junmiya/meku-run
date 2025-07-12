@@ -6,6 +6,7 @@ import SearchFilter from './components/SearchFilter';
 import Pagination from './components/Pagination';
 import { LocalStorageManager, generateId } from './utils/storage';
 import { PaginationManager, FilterManager } from './utils/pagination';
+import { generateSampleData } from './data/sampleData';
 import './App.css';
 
 function App() {
@@ -25,7 +26,15 @@ function App() {
   // Load cards from localStorage on component mount
   useEffect(() => {
     const savedCards = LocalStorageManager.load();
-    setCards(savedCards);
+    
+    // If no saved cards, load sample data
+    if (savedCards.length === 0) {
+      const sampleCards = generateSampleData();
+      setCards(sampleCards);
+      LocalStorageManager.save(sampleCards);
+    } else {
+      setCards(savedCards);
+    }
   }, []);
 
   // Save cards to localStorage whenever cards change
@@ -121,16 +130,33 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleLoadSampleData = () => {
+    if (window.confirm('現在のデータを削除してTOEIC700点レベルのサンプルデータを読み込みますか？')) {
+      const sampleCards = generateSampleData();
+      setCards(sampleCards);
+      LocalStorageManager.save(sampleCards);
+      setCurrentPage(1);
+    }
+  };
+
   return (
     <div className="App">
       <header className="app-header">
         <h1>単語カードアプリ</h1>
-        <button 
-          className="create-btn"
-          onClick={() => setShowForm(true)}
-        >
-          新しいカードを作成
-        </button>
+        <div className="header-buttons">
+          <button 
+            className="sample-btn"
+            onClick={handleLoadSampleData}
+          >
+            TOEIC700点サンプル
+          </button>
+          <button 
+            className="create-btn"
+            onClick={() => setShowForm(true)}
+          >
+            新しいカードを作成
+          </button>
+        </div>
       </header>
 
       <main className="app-main">
