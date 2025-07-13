@@ -182,14 +182,24 @@ function WordCardApp() {
 }
 
 function App() {
-  // Handle auth callback route
+  // Handle auth callback route - immediate redirect
   if (window.location.pathname === '/auth/callback') {
+    // Clear hash and redirect to home
+    setTimeout(() => {
+      window.history.replaceState({}, document.title, '/');
+      window.location.reload();
+    }, 100);
+    
     return (
-      <AuthProvider>
-        <AuthCallback onComplete={() => {
-          window.location.href = '/';
-        }} />
-      </AuthProvider>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '18px'
+      }}>
+        認証完了中...
+      </div>
     );
   }
 
