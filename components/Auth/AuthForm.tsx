@@ -83,17 +83,25 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
   const handleGoogleSignIn = async () => {
     try {
       setError(null);
+      console.log('Starting Google OAuth...');
+      
       const result = await signInWithGoogle();
+      console.log('Google OAuth result:', result);
       
       if (result.error) {
+        console.error('Google OAuth error:', result.error);
         setError(getErrorMessage(result.error.message));
       } else if (result.data.url) {
-        // Redirect to Google OAuth URL
-        window.location.href = result.data.url;
+        console.log('Redirecting to Google OAuth URL:', result.data.url);
+        // Direct window redirect to bypass CSP issues
+        window.open(result.data.url, '_self');
+      } else {
+        console.log('No URL returned from Google OAuth');
+        setError('Google認証URLの取得に失敗しました');
       }
     } catch (err) {
-      setError('Google認証でエラーが発生しました');
       console.error('Google auth error:', err);
+      setError('Google認証でエラーが発生しました');
     }
   };
 

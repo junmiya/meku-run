@@ -3,5 +3,28 @@
   "outputDirectory": ".next",
   "framework": "nextjs",
   "installCommand": "npm install",
-  "cleanUrls": true
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": ""
+        },
+        {
+          "key": "X-Content-Security-Policy",
+          "value": ""
+        },
+        {
+          "key": "X-WebKit-CSP",
+          "value": ""
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "ALLOWALL"
+        }
+      ]
+    }
+  ]
 }

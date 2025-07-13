@@ -9,31 +9,7 @@ const nextConfig = {
   images: {
     domains: ['lh3.googleusercontent.com'],
   },
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: *",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: *",
-              "style-src 'self' 'unsafe-inline' blob: data: *",
-              "img-src 'self' 'unsafe-inline' blob: data: *",
-              "font-src 'self' blob: data: *",
-              "connect-src 'self' blob: data: *",
-              "frame-src 'self' blob: data: *",
-              "child-src 'self' blob: data: *",
-              "object-src 'self' blob: data: *",
-              "media-src 'self' blob: data: *",
-              "worker-src 'self' blob: data: *"
-            ].join('; ')
-          }
-        ]
-      }
-    ]
-  }
+  // CSP completely disabled for Google OAuth compatibility
 }
 
 module.exports = nextConfig
