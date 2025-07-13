@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import AuthCallback from './components/Auth/AuthCallback';
 import AuthGuard from './components/Auth/AuthGuard';
 import LoadingSpinner from './components/Auth/LoadingSpinner';
 import UserProfile from './components/Auth/UserProfile';
@@ -181,6 +182,17 @@ function WordCardApp() {
 }
 
 function App() {
+  // Handle auth callback route
+  if (window.location.pathname === '/auth/callback') {
+    return (
+      <AuthProvider>
+        <AuthCallback onComplete={() => {
+          window.location.href = '/';
+        }} />
+      </AuthProvider>
+    );
+  }
+
   return (
     <AuthProvider>
       <DataManagerProvider>
