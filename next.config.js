@@ -17,35 +17,18 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy',
             value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: https://accounts.google.com https://apis.google.com https://www.google.com https://ssl.gstatic.com https://www.gstatic.com https://accounts.youtube.com",
-              "style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com",
-              "img-src 'self' data: blob: https://lh3.googleusercontent.com https://ssl.gstatic.com https://www.gstatic.com https://accounts.google.com",
-              "font-src 'self' https://fonts.gstatic.com",
-              "connect-src 'self' blob: https://*.supabase.co https://accounts.google.com https://oauth2.googleapis.com https://www.googleapis.com https://accounts.youtube.com",
-              "frame-src 'self' https://accounts.google.com https://www.google.com https://accounts.youtube.com",
-              "child-src 'self' blob: https://accounts.google.com",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self' https://accounts.google.com",
-              "frame-ancestors 'self'"
+              "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: *",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: *",
+              "style-src 'self' 'unsafe-inline' blob: data: *",
+              "img-src 'self' 'unsafe-inline' blob: data: *",
+              "font-src 'self' blob: data: *",
+              "connect-src 'self' blob: data: *",
+              "frame-src 'self' blob: data: *",
+              "child-src 'self' blob: data: *",
+              "object-src 'self' blob: data: *",
+              "media-src 'self' blob: data: *",
+              "worker-src 'self' blob: data: *"
             ].join('; ')
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN'
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
           }
         ]
       }
