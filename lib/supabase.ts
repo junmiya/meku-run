@@ -1,6 +1,4 @@
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 
 // 環境変数の型定義
 declare global {
@@ -14,9 +12,6 @@ declare global {
 
 // クライアントサイド用
 export const createClient = () => createClientComponentClient()
-
-// サーバーサイド用
-export const createServerClient = () => createServerComponentClient({ cookies })
 
 // 開発環境用のデフォルト値（本番では実際の値を使用）
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co';
