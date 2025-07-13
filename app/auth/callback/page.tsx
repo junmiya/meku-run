@@ -16,50 +16,97 @@ function AuthCallbackContent() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // URLパラメータからcode を取得
-        const code = searchParams.get('code')
+        console.log('Auth callback page loaded')
+        console.log('Current URL:', window.location.href)
         
-        if (code) {
-          // Authorization Code を使ってセッションを確立
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+        // URLフラグメント（#）のトークンを処理
+        const hash = window.location.hash
+        console.log('URL hash:', hash)
+        
+        if (hash && hash.includes('access_token')) {
+          console.log('Found access token in URL hash')
           
-          if (error) {
-            console.error('Auth exchange error:', error)
-            router.push('/?error=auth_failed')
-            return
-          }
-
-          if (data.session) {
-            console.log('Authentication successful:', data.user?.email)
-            // 認証成功時はホームページにリダイレクト
-            router.push('/')
-          } else {
-            console.log('No session created')
-            router.push('/?error=no_session')
-          }
-        } else {
-          // codeパラメータがない場合、従来の方法でセッション確認
+          // Supabaseがフラグメントからセッションを自動設定
           const { data, error } = await supabase.auth.getSession()
           
           if (error) {
-            console.error('Auth callback error:', error)
-            router.push('/?error=session_error')
+            console.error('Session error after OAuth:', error)
+            router.push('/?error=session_failed')
             return
           }
 
           if (data.session) {
+            console.log('Session created successfully:', data.session.user?.email)
+            // URLを清掃してからリダイレクト
+            window.history.replaceState({}, document.title, '/auth/callback')
             router.push('/')
           } else {
-            router.push('/?error=no_code')
+            console.log('No session found, checking for manual token parsing')
+            // 手動でトークンを処理
+            const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+              access_token: new URLSearchParams(hash.substring(1)).get('access_token') || '',
+              refresh_token: new URLSearchParams(hash.substring(1)).get('refresh_token') || ''
+            })
+            
+            if (sessionError) {
+              console.error('Manual session error:', sessionError)
+              router.push('/?error=manual_session_failed')
+            } else if (sessionData.session) {
+              console.log('Manual session created:', sessionData.session?.user?.email)
+              window.history.replaceState({}, document.title, '/auth/callback')
+              router.push('/')
+            } else {
+              router.push('/?error=no_manual_session')
+            }
+          }
+        } else {
+          // codeパラメータを確認（OAuth code flow）
+          const code = searchParams.get('code')
+          console.log('OAuth code:', code)
+          
+          if (code) {
+            const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+            
+            if (error) {
+              console.error('Code exchange error:', error)
+              router.push('/?error=code_exchange_failed')
+              return
+            }
+
+            if (data.session) {
+              console.log('Code exchange successful:', data.session?.user?.email)
+              router.push('/')
+            } else {
+              router.push('/?error=no_session_from_code')
+            }
+          } else {
+            console.log('No tokens found, checking existing session')
+            const { data, error } = await supabase.auth.getSession()
+            
+            if (error) {
+              console.error('Session check error:', error)
+              router.push('/?error=session_check_failed')
+              return
+            }
+
+            if (data.session) {
+              console.log('Existing session found:', data.session?.user?.email)
+              router.push('/')
+            } else {
+              console.log('No session found, redirecting to home')
+              router.push('/?message=no_session')
+            }
           }
         }
       } catch (err) {
-        console.error('Unexpected auth callback error:', err)
+        console.error('Auth callback error:', err)
         router.push('/?error=unexpected')
       }
     }
 
-    handleAuthCallback()
+    // 少し遅延してからコールバック処理を実行
+    const timer = setTimeout(handleAuthCallback, 100)
+    return () => clearTimeout(timer)
   }, [router, searchParams, supabase.auth])
 
   return (
