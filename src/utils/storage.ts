@@ -14,11 +14,11 @@ export class LocalStorageManager {
   static load(): WordCard[] {
     try {
       const data = localStorage.getItem(STORAGE_KEY);
-      if (!data) return [];
+      if (!data) {return [];}
       
       const cards = JSON.parse(data);
       // Convert date strings back to Date objects
-      return cards.map((card: any) => ({
+      return cards.map((card: WordCard & { createdAt: string; updatedAt: string }) => ({
         ...card,
         createdAt: new Date(card.createdAt),
         updatedAt: new Date(card.updatedAt)

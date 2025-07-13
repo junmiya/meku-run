@@ -1,8 +1,7 @@
 import { WordCard } from '../types/WordCard';
-import { generateId } from '../utils/storage';
 
 // TOEIC700点レベル向け重要単語
-export const toeic700Words: Omit<WordCard, 'id' | 'createdAt' | 'updatedAt'>[] = [
+export const toeic700Words: Omit<WordCard, 'id' | 'created_at' | 'updated_at' | 'user_id'>[] = [
   // ビジネス・職場関連
   {
     word: "accomplish",
@@ -276,15 +275,8 @@ export const toeic700Words: Omit<WordCard, 'id' | 'createdAt' | 'updatedAt'>[] =
 ];
 
 // サンプルデータを生成する関数
-export const generateSampleData = (): WordCard[] => {
-  const now = new Date();
-  
-  return toeic700Words.map((word, index) => ({
-    ...word,
-    id: generateId(),
-    createdAt: new Date(now.getTime() - (toeic700Words.length - index) * 60000), // 1分ずつ古く
-    updatedAt: new Date(now.getTime() - (toeic700Words.length - index) * 60000)
-  }));
+export const generateSampleData = (): Omit<WordCard, 'id' | 'created_at' | 'updated_at' | 'user_id'>[] => {
+  return toeic700Words;
 };
 
 // カテゴリ別統計

@@ -59,7 +59,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
           <label>並び順:</label>
           <select
             value={sortBy}
-            onChange={(e) => onSortByChange(e.target.value as any)}
+            onChange={(e) => onSortByChange(e.target.value as 'createdAt' | 'updatedAt' | 'alphabetical')}
             className="filter-select"
           >
             <option value="createdAt">作成日</option>

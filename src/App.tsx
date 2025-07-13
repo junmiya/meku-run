@@ -1,163 +1,113 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { WordCard as WordCardType } from './types/WordCard';
-import WordCard from './components/WordCard';
+import React, { useState } from 'react';
+
+import AuthGuard from './components/Auth/AuthGuard';
+import LoadingSpinner from './components/Auth/LoadingSpinner';
+import UserProfile from './components/Auth/UserProfile';
 import CardForm from './components/CardForm';
-import SearchFilter from './components/SearchFilter';
 import Pagination from './components/Pagination';
-import { LocalStorageManager, generateId } from './utils/storage';
-import { PaginationManager, FilterManager } from './utils/pagination';
-import { generateSampleData } from './data/sampleData';
+import SearchFilter from './components/SearchFilter';
+import WordCard from './components/WordCard';
+import { AuthProvider } from './contexts/AuthContext';
+import { DataManagerProvider } from './contexts/DataManagerContext';
+import { useCardForm } from './hooks/useCardForm';
+import { useWordCards } from './hooks/useWordCards';
+
 import './App.css';
 
-function App() {
-  const [cards, setCards] = useState<WordCardType[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingCard, setEditingCard] = useState<WordCardType | undefined>();
+function WordCardApp() {
+  const [showProfile, setShowProfile] = useState(false);
   
-  // Pagination and filtering state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(6); // 1ページあたりのカード数
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'createdAt' | 'updatedAt' | 'alphabetical'>('createdAt');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [showStarredOnly, setShowStarredOnly] = useState(false);
-  const [selectedTag, setSelectedTag] = useState('');
+  // カスタムフック使用
+  const wordCardsHook = useWordCards({ itemsPerPage: 6 });
+  const {
+    cards,
+    filteredCards,
+    displayCards,
+    availableTags,
+    totalPages,
+    currentPage,
+    searchQuery,
+    sortBy,
+    sortOrder,
+    showStarredOnly,
+    selectedTag,
+    itemsPerPage,
+    loading,
+    error,
+    isCloudMode,
+    setSearchQuery,
+    setSortBy,
+    setSortOrder,
+    setShowStarredOnly,
+    setSelectedTag,
+    handlePageChange,
+    createCard,
+    updateCard,
+    deleteCard,
+    toggleStar,
+    loadSampleData,
+  } = wordCardsHook;
 
-  // Load cards from localStorage on component mount
-  useEffect(() => {
-    const savedCards = LocalStorageManager.load();
-    
-    // If no saved cards, load sample data
-    if (savedCards.length === 0) {
-      const sampleCards = generateSampleData();
-      setCards(sampleCards);
-      LocalStorageManager.save(sampleCards);
-    } else {
-      setCards(savedCards);
-    }
-  }, []);
+  const cardFormHook = useCardForm({
+    onSave: async (cardData) => {
+      if (cardFormHook.editingCard) {
+        await updateCard(cardFormHook.editingCard.id, cardData);
+      } else {
+        await createCard(cardData);
+      }
+    },
+    onCancel: () => {
+      // カスタムフック内で処理されるため、ここでは何もしない
+    },
+  });
 
-  // Save cards to localStorage whenever cards change
-  useEffect(() => {
-    LocalStorageManager.save(cards);
-  }, [cards]);
-
-  const handleCreateCard = (cardData: Omit<WordCardType, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newCard: WordCardType = {
-      ...cardData,
-      id: generateId(),
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    setCards(prev => [newCard, ...prev]);
-    setShowForm(false);
-  };
-
-  const handleEditCard = (cardData: Omit<WordCardType, 'id' | 'createdAt' | 'updatedAt'>) => {
-    if (!editingCard) return;
-    
-    const updatedCard: WordCardType = {
-      ...editingCard,
-      ...cardData,
-      updatedAt: new Date()
-    };
-    
-    setCards(prev => prev.map(card => 
-      card.id === editingCard.id ? updatedCard : card
-    ));
-    setEditingCard(undefined);
-    setShowForm(false);
-  };
-
-  const handleDeleteCard = (id: string) => {
-    if (window.confirm('このカードを削除しますか？')) {
-      setCards(prev => prev.filter(card => card.id !== id));
-    }
-  };
-
-  const handleToggleStar = (id: string) => {
-    setCards(prev => prev.map(card => 
-      card.id === id ? { ...card, isStarred: !card.isStarred, updatedAt: new Date() } : card
-    ));
-  };
-
-  const handleEditClick = (card: WordCardType) => {
-    setEditingCard(card);
-    setShowForm(true);
-  };
-
-  const handleCancelForm = () => {
-    setShowForm(false);
-    setEditingCard(undefined);
-  };
-
-  // フィルタリングとソート処理
-  const { filteredCards, availableTags, displayCards, totalPages } = useMemo(() => {
-    // フィルタリング
-    const filtered = FilterManager.filterCards(
-      cards,
-      searchQuery,
-      selectedTag,
-      showStarredOnly
+  if (loading) {
+    return (
+      <div className="auth-loading">
+        <LoadingSpinner />
+        <p>データを読み込み中...</p>
+      </div>
     );
-
-    // ソート
-    const sorted = FilterManager.sortCards(filtered, sortBy, sortOrder);
-
-    // ページネーション
-    const paginated = PaginationManager.getPageItems(sorted, currentPage, itemsPerPage);
-    const totalPagesCount = PaginationManager.getTotalPages(sorted.length, itemsPerPage);
-
-    // 利用可能なタグ一覧
-    const tags = FilterManager.getAllTags(cards);
-
-    return {
-      filteredCards: sorted,
-      availableTags: tags,
-      displayCards: paginated,
-      totalPages: totalPagesCount
-    };
-  }, [cards, currentPage, itemsPerPage, searchQuery, sortBy, sortOrder, showStarredOnly, selectedTag]);
-
-  // 検索やフィルタが変更されたときは1ページ目に戻る
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, selectedTag, showStarredOnly, sortBy, sortOrder]);
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    // ページ変更時に一番上にスクロール
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleLoadSampleData = () => {
-    if (window.confirm('現在のデータを削除してTOEIC700点レベルのサンプルデータを読み込みますか？')) {
-      const sampleCards = generateSampleData();
-      setCards(sampleCards);
-      LocalStorageManager.save(sampleCards);
-      setCurrentPage(1);
-    }
-  };
+  }
 
   return (
     <div className="App">
       <header className="app-header">
         <h1>単語カードアプリ</h1>
+        <div className="header-status">
+          {isCloudMode ? (
+            <span className="cloud-mode">☁️ クラウド同期</span>
+          ) : (
+            <span className="local-mode">💾 ローカル保存</span>
+          )}
+        </div>
         <div className="header-buttons">
           <button 
             className="sample-btn"
-            onClick={handleLoadSampleData}
+            onClick={loadSampleData}
           >
             TOEIC700点サンプル
           </button>
           <button 
             className="create-btn"
-            onClick={() => setShowForm(true)}
+            onClick={cardFormHook.openCreateForm}
           >
             新しいカードを作成
           </button>
+          <button 
+            className="profile-btn"
+            onClick={() => setShowProfile(true)}
+          >
+            👤 プロフィール
+          </button>
         </div>
       </header>
+
+      {error && (
+        <div className="error-message">
+          <p>エラー: {error}</p>
+        </div>
+      )}
 
       <main className="app-main">
         {cards.length === 0 ? (
@@ -195,9 +145,9 @@ function App() {
                     <WordCard
                       key={card.id}
                       card={card}
-                      onEdit={handleEditClick}
-                      onDelete={handleDeleteCard}
-                      onToggleStar={handleToggleStar}
+                      onEdit={cardFormHook.openEditForm}
+                      onDelete={deleteCard}
+                      onToggleStar={toggleStar}
                     />
                   ))}
                 </div>
@@ -215,14 +165,30 @@ function App() {
         )}
       </main>
 
-      {showForm && (
+      {cardFormHook.showForm && (
         <CardForm
-          card={editingCard}
-          onSave={editingCard ? handleEditCard : handleCreateCard}
-          onCancel={handleCancelForm}
+          card={cardFormHook.editingCard}
+          onSave={cardFormHook.handleFormSave}
+          onCancel={cardFormHook.closeForm}
         />
       )}
+
+      {showProfile && (
+        <UserProfile onClose={() => setShowProfile(false)} />
+      )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <DataManagerProvider>
+        <AuthGuard>
+          <WordCardApp />
+        </AuthGuard>
+      </DataManagerProvider>
+    </AuthProvider>
   );
 }
 

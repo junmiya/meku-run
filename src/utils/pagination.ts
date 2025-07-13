@@ -24,17 +24,17 @@ export class FilterManager {
         const query = searchQuery.toLowerCase();
         const matchesWord = card.word.toLowerCase().includes(query);
         const matchesMeaning = card.meaning.toLowerCase().includes(query);
-        if (!matchesWord && !matchesMeaning) return false;
+        if (!matchesWord && !matchesMeaning) {return false;}
       }
 
       // タグでフィルタ
       if (selectedTag) {
-        if (!card.tags || !card.tags.includes(selectedTag)) return false;
+        if (!card.tags || !card.tags.includes(selectedTag)) {return false;}
       }
 
       // お気に入りでフィルタ
       if (showStarredOnly) {
-        if (!card.isStarred) return false;
+        if (!card.isStarred) {return false;}
       }
 
       return true;
@@ -53,10 +53,10 @@ export class FilterManager {
 
       switch (sortBy) {
         case 'createdAt':
-          comparison = a.createdAt.getTime() - b.createdAt.getTime();
+          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
           break;
         case 'updatedAt':
-          comparison = a.updatedAt.getTime() - b.updatedAt.getTime();
+          comparison = new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
           break;
         case 'alphabetical':
           comparison = a.word.toLowerCase().localeCompare(b.word.toLowerCase());

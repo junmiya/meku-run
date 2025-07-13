@@ -16,7 +16,7 @@ const Pagination: React.FC<PaginationProps> = ({
   itemsPerPage,
   totalItems
 }) => {
-  if (totalPages <= 1) return null;
+  if (totalPages <= 1) {return null;}
 
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);

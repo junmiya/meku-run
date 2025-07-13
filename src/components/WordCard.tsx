@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import { WordCard as WordCardType } from '../types/WordCard';
 import './WordCard.css';
 

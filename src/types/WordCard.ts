@@ -2,10 +2,11 @@ export interface WordCard {
   id: string;
   word: string;
   meaning: string;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at: string;
+  updated_at: string;
   tags?: string[];
   isStarred?: boolean;
+  user_id?: string;
 }
 
 export interface AppState {

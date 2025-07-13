@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+
 import { WordCard } from '../types/WordCard';
 import './CardForm.css';
 
 interface CardFormProps {
-  card?: WordCard;
-  onSave: (card: Omit<WordCard, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  card?: WordCard | undefined;
+  onSave: (card: Omit<WordCard, 'id' | 'created_at' | 'updated_at'>) => void;
   onCancel: () => void;
 }
 
@@ -33,12 +34,14 @@ const CardForm: React.FC<CardFormProps> = ({ card, onSave, onCancel }) => {
 
     const tagArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
 
-    onSave({
+    const cardData: Omit<WordCard, 'id' | 'created_at' | 'updated_at'> = {
       word: word.trim(),
       meaning: meaning.trim(),
-      tags: tagArray.length > 0 ? tagArray : undefined,
-      isStarred
-    });
+      isStarred,
+      ...(tagArray.length > 0 && { tags: tagArray })
+    };
+
+    onSave(cardData);
 
     // Reset form
     setWord('');

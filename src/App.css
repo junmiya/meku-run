@@ -13,6 +13,29 @@
   margin-bottom: 30px;
 }
 
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cloud-mode, .local-mode {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.cloud-mode {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.local-mode {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  color: #8b4513;
+}
+
 .header-buttons {
   display: flex;
   gap: 10px;
@@ -59,6 +82,39 @@
 .sample-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.profile-btn {
+  background: linear-gradient(135deg, #fd7e14 0%, #e85d04 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(253, 126, 20, 0.3);
+}
+
+.profile-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(253, 126, 20, 0.4);
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 20px;
+  text-align: center;
+}
+
+.error-message p {
+  margin: 0;
+  font-weight: 600;
 }
 
 .app-main {
