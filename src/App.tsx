@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-import AuthCallback from './components/Auth/AuthCallback';
 import AuthGuard from './components/Auth/AuthGuard';
 import LoadingSpinner from './components/Auth/LoadingSpinner';
 import UserProfile from './components/Auth/UserProfile';
@@ -184,11 +183,8 @@ function WordCardApp() {
 function App() {
   // Handle auth callback route - immediate redirect
   if (window.location.pathname === '/auth/callback') {
-    // Clear hash and redirect to home
-    setTimeout(() => {
-      window.history.replaceState({}, document.title, '/');
-      window.location.reload();
-    }, 100);
+    // Immediate redirect using window.location
+    window.location.href = window.location.origin;
     
     return (
       <div style={{ 
@@ -198,7 +194,7 @@ function App() {
         height: '100vh',
         fontSize: '18px'
       }}>
-        認証完了中...
+        認証完了中...リダイレクトしています...
       </div>
     );
   }
