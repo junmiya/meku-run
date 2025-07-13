@@ -1,47 +1,102 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '../../../lib/supabase'
 import LoadingSpinner from '../../../components/Auth/LoadingSpinner'
 
-export default function AuthCallbackPage() {
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
+function AuthCallbackContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
 
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Supabase認証のコールバック処理
-        const { data, error } = await supabase.auth.getSession()
+        // URLパラメータからcode を取得
+        const code = searchParams.get('code')
         
-        if (error) {
-          console.error('Auth callback error:', error)
-          // エラーの場合もホームにリダイレクト
-          router.push('/')
-          return
-        }
+        if (code) {
+          // Authorization Code を使ってセッションを確立
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+          
+          if (error) {
+            console.error('Auth exchange error:', error)
+            router.push('/?error=auth_failed')
+            return
+          }
 
-        if (data.session) {
-          // 認証成功時はホームページにリダイレクト
-          router.push('/')
+          if (data.session) {
+            console.log('Authentication successful:', data.user?.email)
+            // 認証成功時はホームページにリダイレクト
+            router.push('/')
+          } else {
+            console.log('No session created')
+            router.push('/?error=no_session')
+          }
         } else {
-          // セッションがない場合もホームにリダイレクト
-          router.push('/')
+          // codeパラメータがない場合、従来の方法でセッション確認
+          const { data, error } = await supabase.auth.getSession()
+          
+          if (error) {
+            console.error('Auth callback error:', error)
+            router.push('/?error=session_error')
+            return
+          }
+
+          if (data.session) {
+            router.push('/')
+          } else {
+            router.push('/?error=no_code')
+          }
         }
       } catch (err) {
         console.error('Unexpected auth callback error:', err)
-        router.push('/')
+        router.push('/?error=unexpected')
       }
     }
 
     handleAuthCallback()
-  }, [router, supabase.auth])
+  }, [router, searchParams, supabase.auth])
 
   return (
-    <div className="auth-loading">
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      minHeight: '50vh',
+      padding: '20px'
+    }}>
       <LoadingSpinner />
-      <p>認証を完了しています...</p>
+      <p style={{ marginTop: '20px', textAlign: 'center' }}>
+        認証を完了しています...
+      </p>
     </div>
+  )
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        minHeight: '50vh',
+        padding: '20px'
+      }}>
+        <LoadingSpinner />
+        <p style={{ marginTop: '20px', textAlign: 'center' }}>
+          読み込み中...
+        </p>
+      </div>
+    }>
+      <AuthCallbackContent />
+    </Suspense>
   )
 }
