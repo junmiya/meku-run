@@ -48,6 +48,19 @@ jobs:
         ls -la out/
         echo "Build files created successfully"
 
+    - name: Check Firebase Service Account
+      run: |
+        if [ -z "${{ secrets.FIREBASE_SERVICE_ACCOUNT_MEKU_RUN }}" ]; then
+          echo "❌ FIREBASE_SERVICE_ACCOUNT_MEKU_RUN is not set in GitHub Secrets"
+          echo "Please add the Firebase Service Account JSON to GitHub Secrets"
+          echo "Repository Settings > Secrets and variables > Actions > New repository secret"
+          echo "Name: FIREBASE_SERVICE_ACCOUNT_MEKU_RUN"
+          echo "Value: [Firebase Service Account JSON]"
+          exit 1
+        else
+          echo "✅ FIREBASE_SERVICE_ACCOUNT_MEKU_RUN is configured"
+        fi
+        
     - name: Deploy to Firebase Hosting (Live)
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       uses: FirebaseExtended/action-hosting-deploy@v0
@@ -56,6 +69,8 @@ jobs:
         firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MEKU_RUN }}
         channelId: live
         projectId: meku-run
+      env:
+        FIREBASE_CLI_EXPERIMENTS: webframeworks
         
     - name: Deploy Preview (PR only)
       if: github.event_name == 'pull_request'
