@@ -215,6 +215,14 @@ firebase deploy --project meku-run
 
 MIT License - 詳細は [LICENSE](LICENSE) ファイルを参照
 
+## 🧠 関連リポジトリ
+
+- **[Development Knowledge Base](https://github.com/[USERNAME]/development-knowledge-base)** - このプロジェクトで蓄積したノウハウとテンプレート集
+  - 🚀 Firebase + Next.js プロジェクトテンプレート
+  - 📚 CI/CD設定・Firebase認証・品質管理のガイド
+  - 🔧 自動化スクリプトと学習ログシステム
+  - 💡 Claude Code AI協働のベストプラクティス
+
 ## 👨‍💻 作成者
 
 - **GitHub**: [@junmiya](https://github.com/junmiya)
