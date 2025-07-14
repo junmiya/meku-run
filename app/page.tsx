@@ -14,7 +14,10 @@ import { useCardForm } from '../src/hooks/useCardForm'
 import { WordCard as WordCardType } from '../src/types/WordCard'
 
 export default function HomePage() {
-  const { user, loading } = useAuth()
+  const { user, loading, isAuthEnabled } = useAuth()
+  
+  // デバッグ用ログ
+  console.log('HomePage - Auth Status:', { user, loading, isAuthEnabled })
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
   const [showUserProfile, setShowUserProfile] = useState(false)
 
@@ -93,6 +96,12 @@ export default function HomePage() {
     return (
       <div style={{ padding: '20px' }}>
         <h1>単語カードアプリ</h1>
+        <div style={{ background: '#f0f0f0', padding: '10px', margin: '10px 0', fontSize: '12px' }}>
+          <strong>デバッグ情報:</strong><br/>
+          認証有効: {isAuthEnabled ? 'ON' : 'OFF'}<br/>
+          ユーザー: {user ? 'ログイン済み' : 'ログインなし'}<br/>
+          ローディング: {loading ? 'YES' : 'NO'}
+        </div>
         <p>ログインして単語カードの学習を始めましょう</p>
         <AuthForm mode={authMode} onToggleMode={toggleAuthMode} />
       </div>
