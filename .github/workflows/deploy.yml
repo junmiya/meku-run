@@ -28,7 +28,12 @@ jobs:
       run: npm ci
 
     - name: Build Application
-      run: npm run build
+      run: |
+        echo "Node.js version: $(node --version)"
+        echo "NPM version: $(npm --version)"
+        echo "Environment variables:"
+        echo "NEXT_PUBLIC_AUTH_ENABLED: $NEXT_PUBLIC_AUTH_ENABLED"
+        npm run build
       env:
         NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY || 'AIzaSyBJSobP7SJjT0kLDKx7cIrq2uCeTlKs978' }}
         NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'meku-run.firebaseapp.com' }}
