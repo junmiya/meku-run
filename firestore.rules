@@ -1,20 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // ユーザーごとの単語カードコレクション
-    match /users/{userId}/wordCards/{cardId} {
-      // 認証されたユーザーのみアクセス可能
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // ユーザープロファイル（将来的に使用する可能性）
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // その他のドキュメントへのアクセスを拒否
+    // テストモード: 30日間すべてのアクセスを許可
     match /{document=**} {
-      allow read, write: if false;
+      allow read, write: if request.time < timestamp.date(2025, 2, 15);
     }
   }
 }
