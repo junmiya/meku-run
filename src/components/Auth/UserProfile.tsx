@@ -31,7 +31,9 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
       <div className="user-profile">
         <div className="profile-header">
           <h3>プロフィール</h3>
-          <button onClick={onClose} className="close-button">×</button>
+          <button onClick={onClose} className="close-button">
+            ×
+          </button>
         </div>
 
         <div className="profile-content">
@@ -47,9 +49,7 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
             </div>
 
             <div className="user-details">
-              <p className="user-name">
-                {user.displayName || 'ユーザー'}
-              </p>
+              <p className="user-name">{user.displayName || 'ユーザー'}</p>
               <p className="user-email">{user.email}</p>
             </div>
           </div>
@@ -58,29 +58,23 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
             <div className="stat">
               <span className="stat-label">アカウント作成日</span>
               <span className="stat-value">
-                {user.metadata.creationTime 
+                {user.metadata.creationTime
                   ? new Date(user.metadata.creationTime).toLocaleDateString('ja-JP')
-                  : '不明'
-                }
+                  : '不明'}
               </span>
             </div>
             <div className="stat">
               <span className="stat-label">最終ログイン</span>
               <span className="stat-value">
-                {user.metadata.lastSignInTime 
+                {user.metadata.lastSignInTime
                   ? new Date(user.metadata.lastSignInTime).toLocaleDateString('ja-JP')
-                  : '不明'
-                }
+                  : '不明'}
               </span>
             </div>
           </div>
 
           <div className="profile-actions">
-            <button
-              onClick={handleSignOut}
-              disabled={isSigningOut}
-              className="signout-button"
-            >
+            <button onClick={handleSignOut} disabled={isSigningOut} className="signout-button">
               {isSigningOut ? 'ログアウト中...' : 'ログアウト'}
             </button>
           </div>

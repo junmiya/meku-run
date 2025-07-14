@@ -21,7 +21,9 @@ export const useCardForm = ({ onSave, onCancel }: UseCardFormOptions) => {
     setShowForm(true);
   };
 
-  const handleFormSave = (cardData: Omit<WordCard, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+  const handleFormSave = (
+    cardData: Omit<WordCard, 'id' | 'created_at' | 'updated_at' | 'user_id'>
+  ) => {
     onSave(cardData);
     closeForm();
   };

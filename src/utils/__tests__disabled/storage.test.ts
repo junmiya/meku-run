@@ -99,7 +99,10 @@ describe('LocalStorageManager', () => {
       const loaded = LocalStorageManager.load();
 
       expect(loaded).toEqual([]);
-      expect(consoleSpy).toHaveBeenCalledWith('Failed to load from localStorage:', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Failed to load from localStorage:',
+        expect.any(Error)
+      );
 
       consoleSpy.mockRestore();
     });

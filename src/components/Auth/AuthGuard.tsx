@@ -34,15 +34,16 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
           <h1>単語カードアプリ</h1>
           <p>アカウントにログインして、クラウド同期をご利用ください</p>
         </header>
-        
-        <AuthForm 
-          mode={authMode} 
-          onToggleMode={() => setAuthMode(authMode === 'signin' ? 'signup' : 'signin')} 
+
+        <AuthForm
+          mode={authMode}
+          onToggleMode={() => setAuthMode(authMode === 'signin' ? 'signup' : 'signin')}
         />
-        
+
         <div className="auth-footer">
           <p>
-            <strong>ローカルでのご利用も可能です</strong><br />
+            <strong>ローカルでのご利用も可能です</strong>
+            <br />
             ログインしなくても、ブラウザ内でデータを保存して利用できます。
           </p>
         </div>

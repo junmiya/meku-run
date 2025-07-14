@@ -123,7 +123,7 @@
   user-select: none;
 }
 
-.checkbox-label input[type="checkbox"] {
+.checkbox-label input[type='checkbox'] {
   margin: 0;
 }
 
@@ -143,17 +143,17 @@
   .search-filter {
     padding: 15px;
   }
-  
+
   .filter-section {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .filter-group {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .filter-select {
     flex: 1;
     max-width: 150px;

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -71,7 +71,7 @@ export const MigrationDialog: React.FC<MigrationDialogProps> = ({ isOpen, onClos
 
       if (migrationResult.success) {
         setMigrationResult(`移行完了: ${localCards.length}件のデータを処理しました`);
-        
+
         // データ数を再確認
         await checkDataCounts();
       } else {
@@ -105,7 +105,7 @@ export const MigrationDialog: React.FC<MigrationDialogProps> = ({ isOpen, onClos
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
         <h2 className="text-xl font-bold mb-4">データ移行</h2>
-        
+
         {!isAuthEnabled ? (
           <div className="text-center">
             <p className="mb-4">認証機能が無効のため、データ移行は利用できません。</p>
@@ -139,7 +139,8 @@ export const MigrationDialog: React.FC<MigrationDialogProps> = ({ isOpen, onClos
             <div className="mb-4">
               <h3 className="font-semibold mb-2">移行について</h3>
               <p className="text-sm text-gray-600">
-                LocalStorageからFirestoreにデータを移行します。<br/>
+                LocalStorageからFirestoreにデータを移行します。
+                <br />
                 重複したデータは作成されません。
               </p>
             </div>

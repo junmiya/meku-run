@@ -30,7 +30,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
   onSelectedTagChange,
   availableTags,
   totalCards,
-  filteredCards
+  filteredCards,
 }) => {
   return (
     <div className="search-filter">
@@ -40,14 +40,11 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
             type="text"
             placeholder="単語や意味で検索..."
             value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={e => onSearchChange(e.target.value)}
             className="search-input"
           />
           {searchQuery && (
-            <button
-              className="clear-search"
-              onClick={() => onSearchChange('')}
-            >
+            <button className="clear-search" onClick={() => onSearchChange('')}>
               ×
             </button>
           )}
@@ -59,7 +56,9 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
           <label>並び順:</label>
           <select
             value={sortBy}
-            onChange={(e) => onSortByChange(e.target.value as 'createdAt' | 'updatedAt' | 'alphabetical')}
+            onChange={e =>
+              onSortByChange(e.target.value as 'createdAt' | 'updatedAt' | 'alphabetical')
+            }
             className="filter-select"
           >
             <option value="createdAt">作成日</option>
@@ -79,12 +78,14 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
           <label>タグ:</label>
           <select
             value={selectedTag}
-            onChange={(e) => onSelectedTagChange(e.target.value)}
+            onChange={e => onSelectedTagChange(e.target.value)}
             className="filter-select"
           >
             <option value="">すべて</option>
             {availableTags.map(tag => (
-              <option key={tag} value={tag}>{tag}</option>
+              <option key={tag} value={tag}>
+                {tag}
+              </option>
             ))}
           </select>
         </div>
@@ -94,7 +95,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({
             <input
               type="checkbox"
               checked={showStarredOnly}
-              onChange={(e) => onShowStarredOnlyChange(e.target.checked)}
+              onChange={e => onShowStarredOnlyChange(e.target.checked)}
             />
             お気に入りのみ
           </label>

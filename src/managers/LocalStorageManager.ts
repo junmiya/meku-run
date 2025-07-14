@@ -41,10 +41,12 @@ export class LocalStorageManager implements DataManager {
     return cards.find(card => card.id === id) || null;
   }
 
-  async createCard(cardData: Omit<WordCard, 'id' | 'created_at' | 'updated_at'>): Promise<WordCard> {
+  async createCard(
+    cardData: Omit<WordCard, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<WordCard> {
     const cards = this.getStoredCards();
     const now = this.getCurrentTimestamp();
-    
+
     const newCard: WordCard = {
       ...cardData,
       id: this.generateId(),
@@ -54,14 +56,17 @@ export class LocalStorageManager implements DataManager {
 
     cards.push(newCard);
     this.saveCards(cards);
-    
+
     return newCard;
   }
 
-  async updateCard(id: string, updates: Partial<Omit<WordCard, 'id' | 'created_at'>>): Promise<WordCard> {
+  async updateCard(
+    id: string,
+    updates: Partial<Omit<WordCard, 'id' | 'created_at'>>
+  ): Promise<WordCard> {
     const cards = this.getStoredCards();
     const cardIndex = cards.findIndex(card => card.id === id);
-    
+
     if (cardIndex === -1) {
       throw new Error(`Card with id ${id} not found`);
     }
@@ -80,25 +85,27 @@ export class LocalStorageManager implements DataManager {
 
     cards[cardIndex] = updatedCard;
     this.saveCards(cards);
-    
+
     return updatedCard;
   }
 
   async deleteCard(id: string): Promise<void> {
     const cards = this.getStoredCards();
     const filteredCards = cards.filter(card => card.id !== id);
-    
+
     if (filteredCards.length === cards.length) {
       throw new Error(`Card with id ${id} not found`);
     }
-    
+
     this.saveCards(filteredCards);
   }
 
-  async createCards(cardsData: Omit<WordCard, 'id' | 'created_at' | 'updated_at'>[]): Promise<WordCard[]> {
+  async createCards(
+    cardsData: Omit<WordCard, 'id' | 'created_at' | 'updated_at'>[]
+  ): Promise<WordCard[]> {
     const cards = this.getStoredCards();
     const now = this.getCurrentTimestamp();
-    
+
     const newCards: WordCard[] = cardsData.map(cardData => ({
       ...cardData,
       id: this.generateId(),
@@ -108,7 +115,7 @@ export class LocalStorageManager implements DataManager {
 
     cards.push(...newCards);
     this.saveCards(cards);
-    
+
     return newCards;
   }
 

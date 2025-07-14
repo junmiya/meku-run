@@ -175,15 +175,15 @@
   .user-profile {
     margin: 20px;
   }
-  
+
   .profile-header {
     padding: 16px 20px;
   }
-  
+
   .profile-content {
     padding: 20px;
   }
-  
+
   .profile-info {
     flex-direction: column;
     text-align: center;

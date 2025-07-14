@@ -14,9 +14,11 @@ const Pagination: React.FC<PaginationProps> = ({
   totalPages,
   onPageChange,
   itemsPerPage,
-  totalItems
+  totalItems,
 }) => {
-  if (totalPages <= 1) {return null;}
+  if (totalPages <= 1) {
+    return null;
+  }
 
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
@@ -58,7 +60,7 @@ const Pagination: React.FC<PaginationProps> = ({
       <div className="pagination-info">
         {totalItems}件中 {startItem}-{endItem}件を表示
       </div>
-      
+
       <div className="pagination">
         <button
           className="pagination-btn"

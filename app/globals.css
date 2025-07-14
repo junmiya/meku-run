@@ -14,7 +14,8 @@
   padding: 0;
 }
 
-html, body {
+html,
+body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   line-height: 1.6;
   color: #333;
@@ -29,7 +30,9 @@ button {
   font-family: inherit;
 }
 
-input, textarea, select {
+input,
+textarea,
+select {
   font-family: inherit;
 }
 
@@ -55,7 +58,8 @@ input, textarea, select {
   gap: 10px;
 }
 
-.cloud-mode, .local-mode {
+.cloud-mode,
+.local-mode {
   padding: 8px 16px;
   border-radius: 20px;
   font-size: 14px;
@@ -184,22 +188,22 @@ input, textarea, select {
     gap: 15px;
     text-align: center;
   }
-  
+
   .app-header h1 {
     font-size: 24px;
   }
-  
+
   .header-buttons {
     flex-direction: column;
     width: 100%;
     max-width: 300px;
   }
-  
+
   .create-btn,
   .sample-btn {
     width: 100%;
   }
-  
+
   .cards-grid {
     justify-content: center;
   }

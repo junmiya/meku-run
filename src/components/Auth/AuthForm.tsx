@@ -85,13 +85,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
       'auth/user-not-found': 'このメールアドレスのアカウントが見つかりません',
       'auth/wrong-password': 'パスワードが間違っています',
       'auth/invalid-credential': 'メールアドレスまたはパスワードが正しくありません',
-      'auth/too-many-requests': 'ログイン試行回数が多すぎます。しばらく待ってから再試行してください',
+      'auth/too-many-requests':
+        'ログイン試行回数が多すぎます。しばらく待ってから再試行してください',
       'auth/popup-closed-by-user': 'ログインがキャンセルされました',
       'auth/weak-password': 'パスワードは6文字以上で入力してください',
       'auth/email-already-in-use': 'このメールアドレスは既に使用されています',
-      '認証機能が無効になっています': '認証機能が無効になっています',
+      認証機能が無効になっています: '認証機能が無効になっています',
     };
-    
+
     return errorMessages[message] || `エラー: ${message}`;
   };
 
@@ -99,7 +100,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
     return (
       <div className="auth-form">
         <h2>パスワードリセット</h2>
-        
+
         <form onSubmit={handleResetPassword}>
           <div className="form-group">
             <label htmlFor="reset-email">メールアドレス</label>
@@ -107,7 +108,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
               type="email"
               id="reset-email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               placeholder="メールアドレスを入力"
               required
             />
@@ -120,11 +121,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
             {loading ? 'リセット中...' : 'パスワードリセット'}
           </button>
 
-          <button
-            type="button"
-            onClick={() => setShowResetPassword(false)}
-            className="link-button"
-          >
+          <button type="button" onClick={() => setShowResetPassword(false)} className="link-button">
             ログインに戻る
           </button>
         </form>
@@ -135,8 +132,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
   return (
     <div className="auth-form">
       <h2>{mode === 'signin' ? 'ログイン' : 'アカウント作成'}</h2>
-      
-      
+
       <form onSubmit={handleSubmit}>
         {mode === 'signup' && (
           <div className="form-group">
@@ -145,7 +141,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
               type="text"
               id="fullName"
               value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              onChange={e => setFullName(e.target.value)}
               placeholder="氏名を入力"
               required
             />
@@ -158,7 +154,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
             type="email"
             id="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             placeholder="メールアドレスを入力"
             required
           />
@@ -170,7 +166,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
             type="password"
             id="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
             placeholder="パスワードを入力（6文字以上）"
             minLength={6}
             required
@@ -181,10 +177,13 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
         {success && <div className="success-message">{success}</div>}
 
         <button type="submit" disabled={loading} className="auth-button">
-          {loading 
-            ? (mode === 'signin' ? 'ログイン中...' : 'アカウント作成中...')
-            : (mode === 'signin' ? 'ログイン' : 'アカウント作成')
-          }
+          {loading
+            ? mode === 'signin'
+              ? 'ログイン中...'
+              : 'アカウント作成中...'
+            : mode === 'signin'
+              ? 'ログイン'
+              : 'アカウント作成'}
         </button>
 
         <div className="auth-links">
@@ -197,16 +196,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
               パスワードを忘れた方
             </button>
           )}
-          
-          <button
-            type="button"
-            onClick={onToggleMode}
-            className="link-button"
-          >
-            {mode === 'signin' 
-              ? 'アカウントをお持ちでない方はこちら' 
-              : '既にアカウントをお持ちの方はこちら'
-            }
+
+          <button type="button" onClick={onToggleMode} className="link-button">
+            {mode === 'signin'
+              ? 'アカウントをお持ちでない方はこちら'
+              : '既にアカウントをお持ちの方はこちら'}
           </button>
         </div>
       </form>

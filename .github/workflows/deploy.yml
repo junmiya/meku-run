@@ -27,6 +27,15 @@ jobs:
     - name: Install Dependencies
       run: npm ci
 
+    - name: Quality Check (Fast)
+      run: |
+        echo "🔍 Running quality checks..."
+        echo "📊 Type checking (target: <10s)..."
+        time npm run type-check
+        echo "✨ Code formatting check (target: <3s)..."
+        time npm run format:check
+        echo "✅ Quality checks completed!"
+
     - name: Build Application
       run: |
         echo "Node.js version: $(node --version)"

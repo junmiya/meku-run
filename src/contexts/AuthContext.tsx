@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
@@ -10,7 +10,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   sendPasswordResetEmail,
-  updateProfile
+  updateProfile,
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
@@ -36,7 +36,7 @@ const ANONYMOUS_USER: User = {
   tenantId: null,
   delete: async () => {},
   getIdToken: async () => '',
-  getIdTokenResult: async () => ({} as any),
+  getIdTokenResult: async () => ({}) as any,
   reload: async () => {},
   toJSON: () => ({}),
 } as User;
@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     console.log('AuthProvider - AUTH_ENABLED:', AUTH_ENABLED);
     console.log('AuthProvider - Environment:', process.env.NODE_ENV);
-    
+
     if (!AUTH_ENABLED) {
       console.log('AuthProvider - Using anonymous user');
       setUser(ANONYMOUS_USER);
@@ -82,12 +82,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     // 認証有効の場合は Firebase Auth を使用
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, user => {
       console.log('AuthProvider - Auth state changed:', {
         uid: user?.uid,
         email: user?.email,
         emailVerified: user?.emailVerified,
-        isAnonymous: user?.isAnonymous
+        isAnonymous: user?.isAnonymous,
       });
       setUser(user);
       setLoading(false);
@@ -120,7 +120,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('AuthProvider - User signed in successfully:', {
         uid: userCredential.user.uid,
         email: userCredential.user.email,
-        emailVerified: userCredential.user.emailVerified
+        emailVerified: userCredential.user.emailVerified,
       });
     } catch (error) {
       console.error('Sign in error:', error);

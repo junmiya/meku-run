@@ -66,7 +66,16 @@ export const useWordCards = (config: UseWordCardsConfig = {}) => {
       displayCards: paginated,
       totalPages: totalPagesCount,
     };
-  }, [cards, currentPage, itemsPerPage, searchQuery, sortBy, sortOrder, showStarredOnly, selectedTag]);
+  }, [
+    cards,
+    currentPage,
+    itemsPerPage,
+    searchQuery,
+    sortBy,
+    sortOrder,
+    showStarredOnly,
+    selectedTag,
+  ]);
 
   // フィルタ変更時のページリセット
   useEffect(() => {
@@ -84,12 +93,13 @@ export const useWordCards = (config: UseWordCardsConfig = {}) => {
     }
   };
 
-  const updateCard = async (id: string, cardData: Omit<WordCard, 'id' | 'created_at' | 'updated_at'>) => {
+  const updateCard = async (
+    id: string,
+    cardData: Omit<WordCard, 'id' | 'created_at' | 'updated_at'>
+  ) => {
     try {
       const updatedCard = await dataManager.updateCard(id, cardData);
-      setCards(prev =>
-        prev.map(card => (card.id === id ? updatedCard : card))
-      );
+      setCards(prev => prev.map(card => (card.id === id ? updatedCard : card)));
     } catch (err) {
       console.error('Error updating card:', err);
       setError(err instanceof Error ? err.message : 'Failed to update card');
@@ -115,9 +125,7 @@ export const useWordCards = (config: UseWordCardsConfig = {}) => {
         const updatedCard = await dataManager.updateCard(id, {
           isStarred: !card.isStarred,
         });
-        setCards(prev =>
-          prev.map(c => (c.id === id ? updatedCard : c))
-        );
+        setCards(prev => prev.map(c => (c.id === id ? updatedCard : c)));
       } catch (err) {
         console.error('Error toggling star:', err);
         setError(err instanceof Error ? err.message : 'Failed to update card');
@@ -126,7 +134,9 @@ export const useWordCards = (config: UseWordCardsConfig = {}) => {
   };
 
   const loadSampleData = async () => {
-    if (window.confirm('現在のデータを削除してTOEIC700点レベルのサンプルデータを読み込みますか？')) {
+    if (
+      window.confirm('現在のデータを削除してTOEIC700点レベルのサンプルデータを読み込みますか？')
+    ) {
       try {
         await dataManager.deleteAllCards();
         const sampleCards = generateSampleData();

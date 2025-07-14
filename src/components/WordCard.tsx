@@ -10,12 +10,7 @@ interface WordCardProps {
   onToggleStar?: (id: string) => void;
 }
 
-const WordCard: React.FC<WordCardProps> = ({ 
-  card, 
-  onEdit, 
-  onDelete, 
-  onToggleStar 
-}) => {
+const WordCard: React.FC<WordCardProps> = ({ card, onEdit, onDelete, onToggleStar }) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
   const handleFlip = () => {
@@ -31,7 +26,9 @@ const WordCard: React.FC<WordCardProps> = ({
             {card.tags && card.tags.length > 0 && (
               <div className="tags">
                 {card.tags.map((tag, index) => (
-                  <span key={index} className="tag">{tag}</span>
+                  <span key={index} className="tag">
+                    {tag}
+                  </span>
                 ))}
               </div>
             )}
@@ -43,29 +40,29 @@ const WordCard: React.FC<WordCardProps> = ({
           </div>
         </div>
       </div>
-      
+
       <div className="card-actions">
-        <button 
+        <button
           className={`star-btn ${card.isStarred ? 'starred' : ''}`}
-          onClick={(e) => {
+          onClick={e => {
             e.stopPropagation();
             onToggleStar?.(card.id);
           }}
         >
           ★
         </button>
-        <button 
+        <button
           className="edit-btn"
-          onClick={(e) => {
+          onClick={e => {
             e.stopPropagation();
             onEdit?.(card);
           }}
         >
           編集
         </button>
-        <button 
+        <button
           className="delete-btn"
-          onClick={(e) => {
+          onClick={e => {
             e.stopPropagation();
             onDelete?.(card.id);
           }}

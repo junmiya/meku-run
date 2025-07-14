@@ -1,27 +1,27 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useAuth } from '../src/contexts/AuthContext'
-import AuthForm from '../src/components/Auth/AuthForm'
-import UserProfile from '../src/components/Auth/UserProfile'
-import LoadingSpinner from '../src/components/Auth/LoadingSpinner'
-import WordCard from '../src/components/WordCard'
-import CardForm from '../src/components/CardForm'
-import SearchFilter from '../src/components/SearchFilter'
-import Pagination from '../src/components/Pagination'
-import { MigrationDialog } from '../src/components/DataMigration/MigrationDialog'
-import { useWordCards } from '../src/hooks/useWordCards'
-import { useCardForm } from '../src/hooks/useCardForm'
-import { WordCard as WordCardType } from '../src/types/WordCard'
+import { useState } from 'react';
+import { useAuth } from '../src/contexts/AuthContext';
+import AuthForm from '../src/components/Auth/AuthForm';
+import UserProfile from '../src/components/Auth/UserProfile';
+import LoadingSpinner from '../src/components/Auth/LoadingSpinner';
+import WordCard from '../src/components/WordCard';
+import CardForm from '../src/components/CardForm';
+import SearchFilter from '../src/components/SearchFilter';
+import Pagination from '../src/components/Pagination';
+import { MigrationDialog } from '../src/components/DataMigration/MigrationDialog';
+import { useWordCards } from '../src/hooks/useWordCards';
+import { useCardForm } from '../src/hooks/useCardForm';
+import { WordCard as WordCardType } from '../src/types/WordCard';
 
 export default function HomePage() {
-  const { user, loading, isAuthEnabled } = useAuth()
-  
+  const { user, loading, isAuthEnabled } = useAuth();
+
   // デバッグ用ログ
-  console.log('HomePage - Auth Status:', { user, loading, isAuthEnabled })
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
-  const [showUserProfile, setShowUserProfile] = useState(false)
-  const [showMigrationDialog, setShowMigrationDialog] = useState(false)
+  console.log('HomePage - Auth Status:', { user, loading, isAuthEnabled });
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [showMigrationDialog, setShowMigrationDialog] = useState(false);
 
   const {
     cards,
@@ -47,51 +47,55 @@ export default function HomePage() {
     deleteCard,
     toggleStar,
     loadSampleData,
-    availableTags
-  } = useWordCards()
+    availableTags,
+  } = useWordCards();
 
-  const [showForm, setShowForm] = useState(false)
-  const [editingCard, setEditingCard] = useState<WordCardType | undefined>()
+  const [showForm, setShowForm] = useState(false);
+  const [editingCard, setEditingCard] = useState<WordCardType | undefined>();
 
   const openFormForNew = () => {
-    setEditingCard(undefined)
-    setShowForm(true)
-  }
+    setEditingCard(undefined);
+    setShowForm(true);
+  };
 
   const openFormForEdit = (card: WordCardType) => {
-    setEditingCard(card)
-    setShowForm(true)
-  }
+    setEditingCard(card);
+    setShowForm(true);
+  };
 
   const closeForm = () => {
-    setShowForm(false)
-    setEditingCard(undefined)
-  }
+    setShowForm(false);
+    setEditingCard(undefined);
+  };
 
   const toggleAuthMode = () => {
-    setAuthMode(authMode === 'signin' ? 'signup' : 'signin')
-  }
+    setAuthMode(authMode === 'signin' ? 'signup' : 'signin');
+  };
 
-  const handleCreateCard = async (cardData: Omit<WordCardType, 'id' | 'created_at' | 'updated_at'>) => {
-    await createCard(cardData)
-    closeForm()
-  }
+  const handleCreateCard = async (
+    cardData: Omit<WordCardType, 'id' | 'created_at' | 'updated_at'>
+  ) => {
+    await createCard(cardData);
+    closeForm();
+  };
 
-  const handleUpdateCard = async (cardData: Omit<WordCardType, 'id' | 'created_at' | 'updated_at'>) => {
+  const handleUpdateCard = async (
+    cardData: Omit<WordCardType, 'id' | 'created_at' | 'updated_at'>
+  ) => {
     if (editingCard) {
-      await updateCard(editingCard.id, cardData)
-      closeForm()
+      await updateCard(editingCard.id, cardData);
+      closeForm();
     }
-  }
+  };
 
   const handleDeleteCard = async (cardId: string) => {
     if (window.confirm('この単語カードを削除しますか？')) {
-      await deleteCard(cardId)
+      await deleteCard(cardId);
     }
-  }
+  };
 
   if (loading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   if (!user) {
@@ -99,20 +103,30 @@ export default function HomePage() {
       <div style={{ padding: '20px' }}>
         <h1>単語カードアプリ</h1>
         <div style={{ background: '#f0f0f0', padding: '10px', margin: '10px 0', fontSize: '12px' }}>
-          <strong>デバッグ情報:</strong><br/>
-          認証有効: {isAuthEnabled ? 'ON' : 'OFF'}<br/>
-          ユーザー: {user ? 'ログイン済み' : 'ログインなし'}<br/>
+          <strong>デバッグ情報:</strong>
+          <br />
+          認証有効: {isAuthEnabled ? 'ON' : 'OFF'}
+          <br />
+          ユーザー: {user ? 'ログイン済み' : 'ログインなし'}
+          <br />
           ローディング: {loading ? 'YES' : 'NO'}
         </div>
         <p>ログインして単語カードの学習を始めましょう</p>
         <AuthForm mode={authMode} onToggleMode={toggleAuthMode} />
       </div>
-    )
+    );
   }
 
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px',
+        }}
+      >
         <h1>単語カードアプリ</h1>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button
@@ -123,7 +137,7 @@ export default function HomePage() {
               color: 'white',
               border: 'none',
               borderRadius: '4px',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
           >
             データ移行
@@ -136,7 +150,7 @@ export default function HomePage() {
               color: 'white',
               border: 'none',
               borderRadius: '4px',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
           >
             {showUserProfile ? 'プロフィールを閉じる' : 'プロフィール'}
@@ -161,7 +175,7 @@ export default function HomePage() {
             borderRadius: '4px',
             cursor: 'pointer',
             fontSize: '16px',
-            marginRight: '10px'
+            marginRight: '10px',
           }}
         >
           新しい単語カードを追加
@@ -177,7 +191,7 @@ export default function HomePage() {
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer',
-              fontSize: '16px'
+              fontSize: '16px',
             }}
           >
             サンプルデータを読み込み
@@ -217,13 +231,15 @@ export default function HomePage() {
             <LoadingSpinner />
           ) : displayCards.length > 0 ? (
             <>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                gap: '20px',
-                margin: '20px 0'
-              }}>
-                {displayCards.map((card) => (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                  gap: '20px',
+                  margin: '20px 0',
+                }}
+              >
+                {displayCards.map(card => (
                   <WordCard
                     key={card.id}
                     card={card}
@@ -253,21 +269,20 @@ export default function HomePage() {
       )}
 
       {error && (
-        <div style={{
-          backgroundColor: '#f8d7da',
-          color: '#721c24',
-          padding: '12px',
-          borderRadius: '4px',
-          margin: '20px 0'
-        }}>
+        <div
+          style={{
+            backgroundColor: '#f8d7da',
+            color: '#721c24',
+            padding: '12px',
+            borderRadius: '4px',
+            margin: '20px 0',
+          }}
+        >
           エラー: {error}
         </div>
       )}
 
-      <MigrationDialog
-        isOpen={showMigrationDialog}
-        onClose={() => setShowMigrationDialog(false)}
-      />
+      <MigrationDialog isOpen={showMigrationDialog} onClose={() => setShowMigrationDialog(false)} />
     </div>
-  )
+  );
 }

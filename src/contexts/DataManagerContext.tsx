@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
@@ -47,11 +47,11 @@ export const DataManagerProvider: React.FC<DataManagerProviderProps> = ({ childr
     if (!isAuthEnabled) {
       throw new Error('認証機能が無効になっているため、クラウドモードに切り替えできません');
     }
-    
+
     if (!user) {
       throw new Error('クラウドモードに切り替えるにはログインが必要です');
     }
-    
+
     firebaseManager.setUser(user);
     setDataManager(firebaseManager);
     setIsCloudMode(true);
@@ -77,14 +77,14 @@ export const DataManagerProvider: React.FC<DataManagerProviderProps> = ({ childr
       // ローカルストレージからデータを取得
       const localManager = new LocalStorageManager();
       const localCards = await localManager.getAllCards();
-      
+
       if (localCards.length === 0) {
         return true; // 移行するデータがない
       }
 
       // クラウドに移行
       const result = await firebaseManager.migrateFromLocalStorage(localCards);
-      
+
       if (result.success) {
         console.log(`${localCards.length} 件のカードをクラウドに移行しました`);
         return true;
@@ -106,11 +106,7 @@ export const DataManagerProvider: React.FC<DataManagerProviderProps> = ({ childr
     migrateToCloud,
   };
 
-  return (
-    <DataManagerContext.Provider value={value}>
-      {children}
-    </DataManagerContext.Provider>
-  );
+  return <DataManagerContext.Provider value={value}>{children}</DataManagerContext.Provider>;
 };
 
 export const useDataManager = (): DataManagerContextType => {

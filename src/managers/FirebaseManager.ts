@@ -13,7 +13,7 @@ import {
   onSnapshot,
   serverTimestamp,
   writeBatch,
-  Timestamp
+  Timestamp,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { WordCard } from '../types/WordCard';
@@ -63,39 +63,42 @@ export class FirebaseManager implements DataManager {
 
   async getAllCards(): Promise<WordCard[]> {
     this.ensureUser();
-    
+
     console.log('FirebaseManager.getAllCards() - User:', this.user?.uid);
     console.log('FirebaseManager.getAllCards() - User email:', this.user?.email);
     console.log('FirebaseManager.getAllCards() - User email verified:', this.user?.emailVerified);
-    
+
     try {
       // ユーザーが有効かチェック
       if (!this.user?.uid) {
         throw new Error('User is not authenticated');
       }
-      
+
       const collectionRef = this.getCollectionRef();
-      console.log('FirebaseManager.getAllCards() - Collection path:', `users/${this.user!.uid}/wordCards`);
-      
+      console.log(
+        'FirebaseManager.getAllCards() - Collection path:',
+        `users/${this.user!.uid}/wordCards`
+      );
+
       // まずは簡単なクエリで試行
       const querySnapshot = await getDocs(collectionRef);
       console.log('FirebaseManager.getAllCards() - Snapshot size:', querySnapshot.size);
-      
+
       const cards: WordCard[] = [];
-      
-      querySnapshot.forEach((doc) => {
+
+      querySnapshot.forEach(doc => {
         cards.push(this.convertFirestoreToWordCard(doc));
       });
-      
+
       // created_atでソート
       cards.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      
+
       return cards;
     } catch (error) {
       console.error('FirebaseManager.getAllCards() - Full error:', error);
       console.error('FirebaseManager.getAllCards() - Error code:', (error as any).code);
       console.error('FirebaseManager.getAllCards() - Error message:', (error as any).message);
-      
+
       // 権限エラーの場合、より詳細な情報を表示
       if ((error as any).code === 'permission-denied') {
         console.error('Permission denied. User info:', {
@@ -103,10 +106,10 @@ export class FirebaseManager implements DataManager {
           email: this.user?.email,
           emailVerified: this.user?.emailVerified,
           isAnonymous: this.user?.isAnonymous,
-          providerData: this.user?.providerData
+          providerData: this.user?.providerData,
         });
       }
-      
+
       throw new Error(`Failed to fetch cards: ${error}`);
     }
   }
@@ -115,11 +118,11 @@ export class FirebaseManager implements DataManager {
     try {
       const docRef = doc(this.getCollectionRef(), id);
       const docSnap = await getDoc(docRef);
-      
+
       if (!docSnap.exists()) {
         return null;
       }
-      
+
       return this.convertFirestoreToWordCard(docSnap);
     } catch (error) {
       console.error('Error fetching card from Firebase:', error);
@@ -127,19 +130,21 @@ export class FirebaseManager implements DataManager {
     }
   }
 
-  async createCard(cardData: Omit<WordCard, 'id' | 'created_at' | 'updated_at'>): Promise<WordCard> {
+  async createCard(
+    cardData: Omit<WordCard, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<WordCard> {
     try {
       const docRef = await addDoc(this.getCollectionRef(), {
         ...cardData,
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
       });
-      
+
       const docSnap = await getDoc(docRef);
       if (!docSnap.exists()) {
         throw new Error('Failed to create card');
       }
-      
+
       return this.convertFirestoreToWordCard(docSnap);
     } catch (error) {
       console.error('Error creating card in Firebase:', error);
@@ -147,23 +152,26 @@ export class FirebaseManager implements DataManager {
     }
   }
 
-  async updateCard(id: string, updates: Partial<Omit<WordCard, 'id' | 'created_at'>>): Promise<WordCard> {
+  async updateCard(
+    id: string,
+    updates: Partial<Omit<WordCard, 'id' | 'created_at'>>
+  ): Promise<WordCard> {
     try {
       const docRef = doc(this.getCollectionRef(), id);
-      
+
       // user_id と updated_at を除外して更新
       const { user_id, ...updateData } = updates;
-      
+
       await updateDoc(docRef, {
         ...updateData,
         updated_at: serverTimestamp(),
       });
-      
+
       const docSnap = await getDoc(docRef);
       if (!docSnap.exists()) {
         throw new Error(`Card with id ${id} not found`);
       }
-      
+
       return this.convertFirestoreToWordCard(docSnap);
     } catch (error) {
       console.error('Error updating card in Firebase:', error);
@@ -181,12 +189,14 @@ export class FirebaseManager implements DataManager {
     }
   }
 
-  async createCards(cardsData: Omit<WordCard, 'id' | 'created_at' | 'updated_at'>[]): Promise<WordCard[]> {
+  async createCards(
+    cardsData: Omit<WordCard, 'id' | 'created_at' | 'updated_at'>[]
+  ): Promise<WordCard[]> {
     try {
       const batch = writeBatch(db);
       const docRefs: any[] = [];
-      
-      cardsData.forEach((cardData) => {
+
+      cardsData.forEach(cardData => {
         const docRef = doc(this.getCollectionRef());
         batch.set(docRef, {
           ...cardData,
@@ -195,9 +205,9 @@ export class FirebaseManager implements DataManager {
         });
         docRefs.push(docRef);
       });
-      
+
       await batch.commit();
-      
+
       // 作成されたドキュメントを取得
       const createdCards: WordCard[] = [];
       for (const docRef of docRefs) {
@@ -206,7 +216,7 @@ export class FirebaseManager implements DataManager {
           createdCards.push(this.convertFirestoreToWordCard(docSnap));
         }
       }
-      
+
       return createdCards;
     } catch (error) {
       console.error('Error creating cards in Firebase:', error);
@@ -218,11 +228,11 @@ export class FirebaseManager implements DataManager {
     try {
       const querySnapshot = await getDocs(this.getCollectionRef());
       const batch = writeBatch(db);
-      
-      querySnapshot.forEach((doc) => {
+
+      querySnapshot.forEach(doc => {
         batch.delete(doc.ref);
       });
-      
+
       await batch.commit();
     } catch (error) {
       console.error('Error deleting all cards from Firebase:', error);
@@ -236,9 +246,9 @@ export class FirebaseManager implements DataManager {
       return { success: true };
     } catch (error) {
       console.error('Error syncing data:', error);
-      return { 
-        success: false, 
-        errors: [error instanceof Error ? error : new Error('Unknown sync error')]
+      return {
+        success: false,
+        errors: [error instanceof Error ? error : new Error('Unknown sync error')],
       };
     }
   }
@@ -249,21 +259,22 @@ export class FirebaseManager implements DataManager {
 
   // リアルタイム同期のためのリスナー
   subscribeToCards(callback: (cards: WordCard[]) => void): () => void {
-    const q = query(
-      this.getCollectionRef(),
-      orderBy('created_at', 'desc')
+    const q = query(this.getCollectionRef(), orderBy('created_at', 'desc'));
+
+    const unsubscribe = onSnapshot(
+      q,
+      querySnapshot => {
+        const cards: WordCard[] = [];
+        querySnapshot.forEach(doc => {
+          cards.push(this.convertFirestoreToWordCard(doc));
+        });
+        callback(cards);
+      },
+      error => {
+        console.error('Error in real-time listener:', error);
+      }
     );
-    
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const cards: WordCard[] = [];
-      querySnapshot.forEach((doc) => {
-        cards.push(this.convertFirestoreToWordCard(doc));
-      });
-      callback(cards);
-    }, (error) => {
-      console.error('Error in real-time listener:', error);
-    });
-    
+
     this.unsubscribeListeners.push(unsubscribe);
     return unsubscribe;
   }
@@ -279,24 +290,26 @@ export class FirebaseManager implements DataManager {
     try {
       const cloudCards = await this.getAllCards();
       const cloudCardIds = new Set(cloudCards.map(card => card.id));
-      
+
       // IDベースの重複チェック（既存のカードは除外）
       const cardsToMigrate = localCards.filter(card => !cloudCardIds.has(card.id));
-      
+
       if (cardsToMigrate.length === 0) {
         return { success: true };
       }
 
       // 新しいカードを作成
-      const cardsData = cardsToMigrate.map(({ id, created_at, updated_at, user_id, ...rest }) => rest);
+      const cardsData = cardsToMigrate.map(
+        ({ id, created_at, updated_at, user_id, ...rest }) => rest
+      );
       await this.createCards(cardsData);
-      
+
       return { success: true };
     } catch (error) {
       console.error('Error migrating from localStorage:', error);
-      return { 
-        success: false, 
-        errors: [error instanceof Error ? error : new Error('Migration failed')]
+      return {
+        success: false,
+        errors: [error instanceof Error ? error : new Error('Migration failed')],
       };
     }
   }

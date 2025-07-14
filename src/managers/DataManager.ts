@@ -7,11 +7,11 @@ export interface DataManager {
   createCard(card: Omit<WordCard, 'id' | 'created_at' | 'updated_at'>): Promise<WordCard>;
   updateCard(id: string, updates: Partial<Omit<WordCard, 'id' | 'created_at'>>): Promise<WordCard>;
   deleteCard(id: string): Promise<void>;
-  
+
   // Bulk operations
   createCards(cards: Omit<WordCard, 'id' | 'created_at' | 'updated_at'>[]): Promise<WordCard[]>;
   deleteAllCards(): Promise<void>;
-  
+
   // Sync operations
   syncData?(): Promise<SyncResult>;
   isOffline?(): boolean;

@@ -26,19 +26,22 @@ const CardForm: React.FC<CardFormProps> = ({ card, onSave, onCancel }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!word.trim() || !meaning.trim()) {
       alert('単語と意味を入力してください');
       return;
     }
 
-    const tagArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+    const tagArray = tags
+      .split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
 
     const cardData: Omit<WordCard, 'id' | 'created_at' | 'updated_at'> = {
       word: word.trim(),
       meaning: meaning.trim(),
       isStarred,
-      ...(tagArray.length > 0 && { tags: tagArray })
+      ...(tagArray.length > 0 && { tags: tagArray }),
     };
 
     onSave(cardData);
@@ -54,7 +57,7 @@ const CardForm: React.FC<CardFormProps> = ({ card, onSave, onCancel }) => {
     <div className="card-form-overlay">
       <div className="card-form">
         <h2>{card ? '単語カードを編集' : '新しい単語カードを作成'}</h2>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="word">単語</label>
@@ -62,7 +65,7 @@ const CardForm: React.FC<CardFormProps> = ({ card, onSave, onCancel }) => {
               type="text"
               id="word"
               value={word}
-              onChange={(e) => setWord(e.target.value)}
+              onChange={e => setWord(e.target.value)}
               placeholder="単語を入力"
               required
             />
@@ -73,7 +76,7 @@ const CardForm: React.FC<CardFormProps> = ({ card, onSave, onCancel }) => {
             <textarea
               id="meaning"
               value={meaning}
-              onChange={(e) => setMeaning(e.target.value)}
+              onChange={e => setMeaning(e.target.value)}
               placeholder="意味を入力"
               rows={3}
               required
@@ -86,7 +89,7 @@ const CardForm: React.FC<CardFormProps> = ({ card, onSave, onCancel }) => {
               type="text"
               id="tags"
               value={tags}
-              onChange={(e) => setTags(e.target.value)}
+              onChange={e => setTags(e.target.value)}
               placeholder="タグ1, タグ2, タグ3"
             />
           </div>
@@ -96,7 +99,7 @@ const CardForm: React.FC<CardFormProps> = ({ card, onSave, onCancel }) => {
               <input
                 type="checkbox"
                 checked={isStarred}
-                onChange={(e) => setIsStarred(e.target.checked)}
+                onChange={e => setIsStarred(e.target.checked)}
               />
               お気に入り
             </label>
