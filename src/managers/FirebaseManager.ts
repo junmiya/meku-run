@@ -62,13 +62,23 @@ export class FirebaseManager implements DataManager {
   }
 
   async getAllCards(): Promise<WordCard[]> {
+    this.ensureUser();
+    
+    console.log('FirebaseManager.getAllCards() - User:', this.user?.uid);
+    console.log('FirebaseManager.getAllCards() - User email:', this.user?.email);
+    
     try {
+      const collectionRef = this.getCollectionRef();
+      console.log('FirebaseManager.getAllCards() - Collection path:', `users/${this.user!.uid}/wordCards`);
+      
       const q = query(
-        this.getCollectionRef(),
+        collectionRef,
         orderBy('created_at', 'desc')
       );
       
       const querySnapshot = await getDocs(q);
+      console.log('FirebaseManager.getAllCards() - Snapshot size:', querySnapshot.size);
+      
       const cards: WordCard[] = [];
       
       querySnapshot.forEach((doc) => {
@@ -77,7 +87,9 @@ export class FirebaseManager implements DataManager {
       
       return cards;
     } catch (error) {
-      console.error('Error fetching cards from Firebase:', error);
+      console.error('FirebaseManager.getAllCards() - Full error:', error);
+      console.error('FirebaseManager.getAllCards() - Error code:', (error as any).code);
+      console.error('FirebaseManager.getAllCards() - Error message:', (error as any).message);
       throw new Error(`Failed to fetch cards: ${error}`);
     }
   }
