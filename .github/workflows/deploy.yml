@@ -61,19 +61,58 @@ jobs:
       run: |
         if [ -z "${{ secrets.FIREBASE_SERVICE_ACCOUNT_MEKU_RUN }}" ]; then
           echo "❌ FIREBASE_SERVICE_ACCOUNT_MEKU_RUN is not set in GitHub Secrets"
-          echo "Please add the Firebase Service Account JSON to GitHub Secrets"
-          echo "Repository Settings > Secrets and variables > Actions > New repository secret"
-          echo "Name: FIREBASE_SERVICE_ACCOUNT_MEKU_RUN"
-          echo "Value: [Firebase Service Account JSON]"
+          echo ""
+          echo "🔧 緊急修正手順:"
+          echo "1. Firebase Console: https://console.firebase.google.com/project/meku-run/settings/serviceaccounts/adminsdk"
+          echo "2. 新しい秘密鍵を生成"
+          echo "3. GitHub Secrets に追加: https://github.com/junmiya/meku-run/settings/secrets/actions"
+          echo "4. Name: FIREBASE_SERVICE_ACCOUNT_MEKU_RUN"
+          echo "5. Value: JSON ファイルの内容全体"
+          echo ""
+          echo "📋 詳細手順: FIREBASE_SERVICE_ACCOUNT_SETUP.md を参照"
           exit 1
         else
           echo "✅ FIREBASE_SERVICE_ACCOUNT_MEKU_RUN is configured"
+          echo "🔍 Secret length: $(echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_MEKU_RUN }}' | wc -c)"
         fi
         
     - name: Validate Service Account JSON
       run: |
-        echo "Validating Service Account JSON format..."
-        echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_MEKU_RUN }}' | jq . > /dev/null && echo "✅ Valid JSON" || echo "❌ Invalid JSON format"
+        echo "🔍 Validating Service Account JSON format..."
+        if echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_MEKU_RUN }}' | jq . > /dev/null; then
+          echo "✅ Valid JSON format"
+          echo "🔍 Checking required fields..."
+          
+          # プロジェクトID確認
+          PROJECT_ID=$(echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_MEKU_RUN }}' | jq -r '.project_id')
+          if [ "$PROJECT_ID" = "meku-run" ]; then
+            echo "✅ Project ID matches: $PROJECT_ID"
+          else
+            echo "❌ Project ID mismatch. Expected: meku-run, Got: $PROJECT_ID"
+            exit 1
+          fi
+          
+          # Service Accountタイプ確認
+          ACCOUNT_TYPE=$(echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_MEKU_RUN }}' | jq -r '.type')
+          if [ "$ACCOUNT_TYPE" = "service_account" ]; then
+            echo "✅ Service Account type correct"
+          else
+            echo "❌ Invalid account type: $ACCOUNT_TYPE"
+            exit 1
+          fi
+          
+          # Client Email確認
+          CLIENT_EMAIL=$(echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_MEKU_RUN }}' | jq -r '.client_email')
+          echo "📧 Service Account Email: $CLIENT_EMAIL"
+          
+        else
+          echo "❌ Invalid JSON format"
+          echo "🔧 修正方法:"
+          echo "1. Firebase Console で新しい Service Account JSON を生成"
+          echo "2. JSON ファイル全体をコピー（改行や空白も含めて）"
+          echo "3. GitHub Secrets に正確に貼り付け"
+          exit 1
+        fi
         
     - name: Deploy to Firebase Hosting (Detailed Debug)
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -99,7 +138,32 @@ jobs:
         firebase --version
         
         echo "🔐 Testing Firebase authentication..."
-        firebase projects:list --json || echo "❌ Authentication failed"
+        if firebase projects:list --json > auth_test.json; then
+          echo "✅ Authentication successful"
+          echo "📋 Available projects:"
+          cat auth_test.json | jq -r '.[] | "\(.projectId) - \(.displayName)"'
+          rm -f auth_test.json
+        else
+          echo "❌ Authentication failed"
+          echo ""
+          echo "🔍 デバッグ情報:"
+          echo "Service Account email: $(echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_MEKU_RUN }}' | jq -r '.client_email')"
+          echo "Project ID: $(echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_MEKU_RUN }}' | jq -r '.project_id')"
+          echo "Credentials file: $(ls -la firebase-service-account.json)"
+          echo ""
+          echo "🔧 考えられる原因:"
+          echo "1. Service Account に Firebase Admin 権限がない"
+          echo "2. Service Account がプロジェクトに追加されていない"
+          echo "3. JSON キーが無効または期限切れ"
+          echo ""
+          echo "🚀 緊急解決方法:"
+          echo "1. Google Cloud Console: https://console.cloud.google.com/iam-admin/iam?project=meku-run"
+          echo "2. Service Account に以下の権限を付与:"
+          echo "   - Firebase Hosting Admin"
+          echo "   - Firebase Authentication Admin"
+          echo "   - Editor (一時的)"
+          exit 1
+        fi
         
         echo "📁 Checking build output..."
         ls -la out/
