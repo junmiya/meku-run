@@ -1,9 +1,18 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // テストモード: 30日間すべてのアクセスを許可
+    // 緊急時テストモード: 一時的に全アクセス許可
     match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2025, 2, 15);
+      allow read, write: if request.time < timestamp.date(2025, 8, 15);
     }
+    
+    // 本番用ルール（テスト完了後に有効化）
+    // match /users/{userId} {
+    //   allow read, write: if request.auth != null && request.auth.uid == userId;
+    //   
+    //   match /wordCards/{cardId} {
+    //     allow read, write: if request.auth != null && request.auth.uid == userId;
+    //   }
+    // }
   }
 }

@@ -71,8 +71,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('AuthProvider - AUTH_ENABLED:', AUTH_ENABLED);
+    console.log('AuthProvider - Environment:', process.env.NODE_ENV);
+    
     if (!AUTH_ENABLED) {
-      // 認証無効の場合は匿名ユーザーを設定
+      console.log('AuthProvider - Using anonymous user');
       setUser(ANONYMOUS_USER);
       setLoading(false);
       return;
@@ -80,6 +83,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // 認証有効の場合は Firebase Auth を使用
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log('AuthProvider - Auth state changed:', {
+        uid: user?.uid,
+        email: user?.email,
+        emailVerified: user?.emailVerified,
+        isAnonymous: user?.isAnonymous
+      });
       setUser(user);
       setLoading(false);
     });
@@ -106,8 +115,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      console.log('AuthProvider - Signing in with email:', email);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log('AuthProvider - User signed in successfully:', {
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+        emailVerified: userCredential.user.emailVerified
+      });
     } catch (error) {
+      console.error('Sign in error:', error);
       throw error;
     }
   };

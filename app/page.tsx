@@ -9,6 +9,7 @@ import WordCard from '../src/components/WordCard'
 import CardForm from '../src/components/CardForm'
 import SearchFilter from '../src/components/SearchFilter'
 import Pagination from '../src/components/Pagination'
+import { MigrationDialog } from '../src/components/DataMigration/MigrationDialog'
 import { useWordCards } from '../src/hooks/useWordCards'
 import { useCardForm } from '../src/hooks/useCardForm'
 import { WordCard as WordCardType } from '../src/types/WordCard'
@@ -20,6 +21,7 @@ export default function HomePage() {
   console.log('HomePage - Auth Status:', { user, loading, isAuthEnabled })
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
   const [showUserProfile, setShowUserProfile] = useState(false)
+  const [showMigrationDialog, setShowMigrationDialog] = useState(false)
 
   const {
     cards,
@@ -112,19 +114,34 @@ export default function HomePage() {
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h1>単語カードアプリ</h1>
-        <button
-          onClick={() => setShowUserProfile(!showUserProfile)}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          {showUserProfile ? 'プロフィールを閉じる' : 'プロフィール'}
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button
+            onClick={() => setShowMigrationDialog(true)}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            データ移行
+          </button>
+          <button
+            onClick={() => setShowUserProfile(!showUserProfile)}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }}
+          >
+            {showUserProfile ? 'プロフィールを閉じる' : 'プロフィール'}
+          </button>
+        </div>
       </div>
 
       {showUserProfile && (
@@ -246,6 +263,11 @@ export default function HomePage() {
           エラー: {error}
         </div>
       )}
+
+      <MigrationDialog
+        isOpen={showMigrationDialog}
+        onClose={() => setShowMigrationDialog(false)}
+      />
     </div>
   )
 }

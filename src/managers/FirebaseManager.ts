@@ -66,17 +66,19 @@ export class FirebaseManager implements DataManager {
     
     console.log('FirebaseManager.getAllCards() - User:', this.user?.uid);
     console.log('FirebaseManager.getAllCards() - User email:', this.user?.email);
+    console.log('FirebaseManager.getAllCards() - User email verified:', this.user?.emailVerified);
     
     try {
+      // ユーザーが有効かチェック
+      if (!this.user?.uid) {
+        throw new Error('User is not authenticated');
+      }
+      
       const collectionRef = this.getCollectionRef();
       console.log('FirebaseManager.getAllCards() - Collection path:', `users/${this.user!.uid}/wordCards`);
       
-      const q = query(
-        collectionRef,
-        orderBy('created_at', 'desc')
-      );
-      
-      const querySnapshot = await getDocs(q);
+      // まずは簡単なクエリで試行
+      const querySnapshot = await getDocs(collectionRef);
       console.log('FirebaseManager.getAllCards() - Snapshot size:', querySnapshot.size);
       
       const cards: WordCard[] = [];
@@ -85,11 +87,26 @@ export class FirebaseManager implements DataManager {
         cards.push(this.convertFirestoreToWordCard(doc));
       });
       
+      // created_atでソート
+      cards.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      
       return cards;
     } catch (error) {
       console.error('FirebaseManager.getAllCards() - Full error:', error);
       console.error('FirebaseManager.getAllCards() - Error code:', (error as any).code);
       console.error('FirebaseManager.getAllCards() - Error message:', (error as any).message);
+      
+      // 権限エラーの場合、より詳細な情報を表示
+      if ((error as any).code === 'permission-denied') {
+        console.error('Permission denied. User info:', {
+          uid: this.user?.uid,
+          email: this.user?.email,
+          emailVerified: this.user?.emailVerified,
+          isAnonymous: this.user?.isAnonymous,
+          providerData: this.user?.providerData
+        });
+      }
+      
       throw new Error(`Failed to fetch cards: ${error}`);
     }
   }
