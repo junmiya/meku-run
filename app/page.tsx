@@ -1,17 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
-import AuthForm from '../components/Auth/AuthForm'
-import UserProfile from '../components/Auth/UserProfile'
-import LoadingSpinner from '../components/Auth/LoadingSpinner'
-import WordCard from '../components/WordCard'
-import CardForm from '../components/CardForm'
-import SearchFilter from '../components/SearchFilter'
-import Pagination from '../components/Pagination'
-import { useWordCards } from '../hooks/useWordCards'
-import { useCardForm } from '../hooks/useCardForm'
-import { WordCard as WordCardType } from '../types/WordCard'
+import { useAuth } from '../src/contexts/AuthContext'
+import AuthForm from '../src/components/Auth/AuthForm'
+import UserProfile from '../src/components/Auth/UserProfile'
+import LoadingSpinner from '../src/components/Auth/LoadingSpinner'
+import WordCard from '../src/components/WordCard'
+import CardForm from '../src/components/CardForm'
+import SearchFilter from '../src/components/SearchFilter'
+import Pagination from '../src/components/Pagination'
+import { useWordCards } from '../src/hooks/useWordCards'
+import { useCardForm } from '../src/hooks/useCardForm'
+import { WordCard as WordCardType } from '../src/types/WordCard'
 
 export default function HomePage() {
   const { user, loading } = useAuth()

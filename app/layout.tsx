@@ -1,5 +1,5 @@
-import { AuthProvider } from '../contexts/AuthContext'
-import { DataManagerProvider } from '../contexts/DataManagerContext'
+import { AuthProvider } from '../src/contexts/AuthContext'
+import { DataManagerProvider } from '../src/contexts/DataManagerContext'
 import './globals.css'
 
 export const metadata = {
