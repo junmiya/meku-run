@@ -41,8 +41,10 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
         setSuccess('アカウントが作成されました');
       }
     } catch (err: any) {
-      setError(getErrorMessage(err.message));
-      console.error('Auth error:', err);
+      console.error('Full auth error:', err);
+      console.error('Error code:', err.code);
+      console.error('Error message:', err.message);
+      setError(getErrorMessage(err.code || err.message));
     }
   };
 
@@ -61,8 +63,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
       setSuccess('パスワードリセットメールを送信しました');
       setShowResetPassword(false);
     } catch (err: any) {
-      setError(getErrorMessage(err.message));
       console.error('Reset password error:', err);
+      setError(getErrorMessage(err.code || err.message));
     }
   };
 
@@ -71,8 +73,8 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
       setError(null);
       await signInWithGoogle();
     } catch (err: any) {
-      setError(getErrorMessage(err.message));
       console.error('Google auth error:', err);
+      setError(getErrorMessage(err.code || err.message));
     }
   };
 
