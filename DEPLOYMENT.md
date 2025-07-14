@@ -183,4 +183,11 @@ npm run type-check
 
 ---
 
+## 🔄 デプロイ実行状況
+
+**更新日時**: 2025-01-14
+**ステータス**: GitHub Actions実行中
+
+---
+
 🤖 Generated with [Claude Code](https://claude.ai/code)
