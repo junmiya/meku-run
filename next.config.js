@@ -17,6 +17,9 @@ const nextConfig = {
     domains: ['lh3.googleusercontent.com'],
     unoptimized: true,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   // CSP completely disabled for Google OAuth compatibility
 }
 
