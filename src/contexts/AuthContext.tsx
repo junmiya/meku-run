@@ -71,9 +71,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('AUTH_ENABLED:', AUTH_ENABLED);
-    console.log('Environment:', process.env.NEXT_PUBLIC_AUTH_ENABLED);
-    
     if (!AUTH_ENABLED) {
       // 認証無効の場合は匿名ユーザーを設定
       setUser(ANONYMOUS_USER);
@@ -83,7 +80,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // 認証有効の場合は Firebase Auth を使用
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log('Firebase Auth State Changed:', user);
       setUser(user);
       setLoading(false);
     });
