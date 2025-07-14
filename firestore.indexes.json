@@ -1,0 +1,39 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "wordCards",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "created_at",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "wordCards",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "updated_at",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "wordCards",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "isStarred",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "created_at",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

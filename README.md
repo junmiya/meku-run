@@ -1,46 +1,184 @@
-# Getting Started with Create React App
+# Firebase Word Card App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Firebase を使用した単語カードアプリケーション。認証オンオフ機能付き。
 
-## Available Scripts
+## 🚀 機能
 
-In the project directory, you can run:
+- **単語カード**: 表面（単語）と裏面（意味）の2面構成
+- **フリップアニメーション**: クリック・タッチで裏返し
+- **認証オンオフ**: 環境変数で認証機能を制御
+- **データ管理**: 認証ON時はFirestore、OFF時はローカルストレージ
+- **リアルタイム同期**: Firebase Firestoreによる同期
+- **レスポンシブ**: モバイル・デスクトップ対応
 
-### `npm start`
+## 📋 認証機能
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### 認証 OFF（初期状態）
+- 匿名ユーザーとして動作
+- ローカルストレージにデータ保存
+- 認証なしで全機能利用可能
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### 認証 ON
+- Firebase Authentication 使用
+- Email/Password + Google OAuth
+- Firestore にユーザー別データ保存
+- リアルタイム同期機能
 
-### `npm test`
+## 🛠️ セットアップ
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 1. Firebase プロジェクト作成
 
-### `npm run build`
+1. [Firebase Console](https://console.firebase.google.com/) でプロジェクト作成
+2. **Authentication** を有効化
+3. **Firestore Database** を有効化
+4. **Hosting** を有効化
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 2. 環境変数設定
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+`.env.local` ファイルを作成：
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+# Firebase Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
 
-### `npm run eject`
+# Authentication Control
+NEXT_PUBLIC_AUTH_ENABLED=false  # 認証機能のON/OFF
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### 3. インストール・実行
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+# 依存関係をインストール
+npm install
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+# 開発サーバー起動
+npm run dev
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+# ビルド
+npm run build
+```
 
-## Learn More
+## 🔧 認証機能の制御
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### 認証を無効化（デフォルト）
+```bash
+NEXT_PUBLIC_AUTH_ENABLED=false
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### 認証を有効化
+```bash
+NEXT_PUBLIC_AUTH_ENABLED=true
+```
+
+## 📁 プロジェクト構造
+
+```
+src/
+├── components/
+│   ├── Auth/                  # 認証関連コンポーネント
+│   ├── WordCard.tsx           # 単語カードコンポーネント
+│   ├── CardForm.tsx           # カード作成フォーム
+│   └── Pagination.tsx         # ページネーション
+├── contexts/
+│   ├── AuthContext.tsx        # 認証状態管理
+│   └── DataManagerContext.tsx # データ管理
+├── managers/
+│   ├── FirebaseManager.ts     # Firebase データ管理
+│   └── LocalStorageManager.ts # ローカルストレージ管理
+├── lib/
+│   └── firebase.ts            # Firebase設定
+└── types/
+    └── WordCard.ts            # 型定義
+```
+
+## 🔐 Firestore セキュリティルール
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/wordCards/{cardId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+```
+
+## 🚀 デプロイ
+
+### GitHub Actions 自動デプロイ
+
+1. GitHub リポジトリ作成
+2. GitHub Secrets 設定：
+   - `FIREBASE_SERVICE_ACCOUNT`: サービスアカウントJSON
+   - `FIREBASE_PROJECT_ID`: プロジェクトID
+3. `main` ブランチにプッシュで自動デプロイ
+
+### 手動デプロイ
+
+```bash
+# Firebase CLI インストール
+npm install -g firebase-tools
+
+# ログイン
+firebase login
+
+# デプロイ
+firebase deploy
+```
+
+## 📊 データ構造
+
+### WordCard
+
+```typescript
+interface WordCard {
+  id: string;
+  word: string;          // 表面：単語
+  meaning: string;       // 裏面：意味
+  created_at: string;
+  updated_at: string;
+  tags?: string[];
+  isStarred?: boolean;
+  user_id?: string;
+}
+```
+
+## 🔄 データ管理
+
+### 認証OFF時
+- `LocalStorageManager` 使用
+- ブラウザのローカルストレージに保存
+- オフライン完全対応
+
+### 認証ON時
+- `FirebaseManager` 使用
+- Firestore Database に保存
+- リアルタイム同期
+- クラウドバックアップ
+
+## 🧪 テスト
+
+```bash
+# テスト実行
+npm test
+
+# 型チェック
+npm run type-check
+
+# リント
+npm run lint
+```
+
+## 📄 ライセンス
+
+MIT License
+
+---
+
+🤖 Generated with [Claude Code](https://claude.ai/code)

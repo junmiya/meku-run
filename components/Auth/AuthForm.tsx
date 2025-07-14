@@ -34,23 +34,14 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
     }
 
     try {
-      let result;
-      
       if (mode === 'signin') {
-        result = await signIn(email, password);
+        await signIn(email, password);
       } else {
-        result = await signUp(email, password, {
-          data: { full_name: fullName }
-        });
+        await signUp(email, password, fullName);
+        setSuccess('アカウントが作成されました');
       }
-
-      if (result.error) {
-        setError(getErrorMessage(result.error.message));
-      } else if (mode === 'signup' && result.data.user && !result.data.session) {
-        setSuccess('確認メールを送信しました。メールをチェックして、アカウントを有効化してください。');
-      }
-    } catch (err) {
-      setError('予期しないエラーが発生しました');
+    } catch (err: any) {
+      setError(getErrorMessage(err.message));
       console.error('Auth error:', err);
     }
   };
@@ -66,16 +57,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
     }
 
     try {
-      const result = await resetPassword(email);
-      
-      if (result.error) {
-        setError(getErrorMessage(result.error.message));
-      } else {
-        setSuccess('パスワードリセットメールを送信しました');
-        setShowResetPassword(false);
-      }
-    } catch (err) {
-      setError('予期しないエラーが発生しました');
+      await resetPassword(email);
+      setSuccess('パスワードリセットメールを送信しました');
+      setShowResetPassword(false);
+    } catch (err: any) {
+      setError(getErrorMessage(err.message));
       console.error('Reset password error:', err);
     }
   };
@@ -83,35 +69,25 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
   const handleGoogleSignIn = async () => {
     try {
       setError(null);
-      console.log('Starting Google OAuth...');
-      
-      const result = await signInWithGoogle();
-      console.log('Google OAuth result:', result);
-      
-      if (result.error) {
-        console.error('Google OAuth error:', result.error);
-        setError(getErrorMessage(result.error.message));
-      } else if (result.data.url) {
-        console.log('Redirecting to Google OAuth URL:', result.data.url);
-        // Direct window redirect to bypass CSP issues
-        window.open(result.data.url, '_self');
-      } else {
-        console.log('No URL returned from Google OAuth');
-        setError('Google認証URLの取得に失敗しました');
-      }
-    } catch (err) {
+      await signInWithGoogle();
+    } catch (err: any) {
+      setError(getErrorMessage(err.message));
       console.error('Google auth error:', err);
-      setError('Google認証でエラーが発生しました');
     }
   };
 
   const getErrorMessage = (message: string): string => {
     const errorMessages: Record<string, string> = {
-      'Invalid login credentials': 'メールアドレスまたはパスワードが正しくありません',
-      'Email not confirmed': 'メールアドレスが確認されていません',
-      'User already registered': 'このメールアドレスは既に登録されています',
-      'Password should be at least 6 characters': 'パスワードは6文字以上で入力してください',
-      'Invalid email': 'メールアドレスの形式が正しくありません',
+      'auth/invalid-email': 'メールアドレスの形式が正しくありません',
+      'auth/user-disabled': 'このアカウントは無効化されています',
+      'auth/user-not-found': 'このメールアドレスのアカウントが見つかりません',
+      'auth/wrong-password': 'パスワードが間違っています',
+      'auth/invalid-credential': 'メールアドレスまたはパスワードが正しくありません',
+      'auth/too-many-requests': 'ログイン試行回数が多すぎます。しばらく待ってから再試行してください',
+      'auth/popup-closed-by-user': 'ログインがキャンセルされました',
+      'auth/weak-password': 'パスワードは6文字以上で入力してください',
+      'auth/email-already-in-use': 'このメールアドレスは既に使用されています',
+      '認証機能が無効になっています': '認証機能が無効になっています',
     };
     
     return errorMessages[message] || `エラー: ${message}`;

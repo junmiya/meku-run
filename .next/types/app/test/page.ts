@@ -1,4 +1,4 @@
-// File: /workspace/word-card-app/app/test/page.tsx
+// File: /workspace/firebase-word-card-app/app/test/page.tsx
 import * as entry from '../../../../app/test/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -37,18 +37,18 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
         <div className="profile-content">
           <div className="profile-info">
             <div className="avatar">
-              {user.user_metadata?.avatar_url ? (
-                <img src={user.user_metadata.avatar_url} alt="Avatar" />
+              {user.photoURL ? (
+                <img src={user.photoURL} alt="Avatar" />
               ) : (
                 <div className="avatar-placeholder">
-                  {user.user_metadata?.full_name?.charAt(0) || user.email?.charAt(0) || '?'}
+                  {user.displayName?.charAt(0) || user.email?.charAt(0) || '?'}
                 </div>
               )}
             </div>
 
             <div className="user-details">
               <p className="user-name">
-                {user.user_metadata?.full_name || 'ユーザー'}
+                {user.displayName || 'ユーザー'}
               </p>
               <p className="user-email">{user.email}</p>
             </div>
@@ -58,14 +58,17 @@ const UserProfile: React.FC<UserProfileProps> = ({ onClose }) => {
             <div className="stat">
               <span className="stat-label">アカウント作成日</span>
               <span className="stat-value">
-                {new Date(user.created_at).toLocaleDateString('ja-JP')}
+                {user.metadata.creationTime 
+                  ? new Date(user.metadata.creationTime).toLocaleDateString('ja-JP')
+                  : '不明'
+                }
               </span>
             </div>
             <div className="stat">
               <span className="stat-label">最終ログイン</span>
               <span className="stat-value">
-                {user.last_sign_in_at 
-                  ? new Date(user.last_sign_in_at).toLocaleDateString('ja-JP')
+                {user.metadata.lastSignInTime 
+                  ? new Date(user.metadata.lastSignInTime).toLocaleDateString('ja-JP')
                   : '不明'
                 }
               </span>

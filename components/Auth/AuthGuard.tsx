@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 
 import { useAuth } from '../../contexts/AuthContext';
 
-import AuthCallback from './AuthCallback';
 import AuthForm from './AuthForm';
 import LoadingSpinner from './LoadingSpinner';
 
@@ -11,19 +10,12 @@ interface AuthGuardProps {
 }
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, isAuthEnabled } = useAuth();
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-  const [showCallback, setShowCallback] = useState(false);
 
-  // Check if this is an OAuth callback
-  useEffect(() => {
-    if (window.location.hash && window.location.hash.includes('access_token')) {
-      setShowCallback(true);
-    }
-  }, []);
-
-  if (showCallback) {
-    return <AuthCallback onComplete={() => setShowCallback(false)} />;
+  // 認証が無効化されている場合は、常に children を表示
+  if (!isAuthEnabled) {
+    return <>{children}</>;
   }
 
   if (loading) {

@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 
 import { DataManager } from '../managers/DataManager';
 import { LocalStorageManager } from '../managers/LocalStorageManager';
-import { SupabaseManager } from '../managers/SupabaseManager';
+import { FirebaseManager } from '../managers/FirebaseManager';
 
 import { useAuth } from './AuthContext';
 
@@ -23,33 +23,37 @@ interface DataManagerProviderProps {
 }
 
 export const DataManagerProvider: React.FC<DataManagerProviderProps> = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, isAuthEnabled } = useAuth();
   const [dataManager, setDataManager] = useState<DataManager>(new LocalStorageManager());
   const [isCloudMode, setIsCloudMode] = useState(false);
-  const [supabaseManager] = useState(new SupabaseManager());
+  const [firebaseManager] = useState(new FirebaseManager());
 
   useEffect(() => {
     if (!loading) {
-      if (user) {
-        // User is authenticated, set up cloud mode
-        supabaseManager.setUser(user);
-        setDataManager(supabaseManager);
+      if (isAuthEnabled && user) {
+        // 認証が有効でユーザーがログインしている場合、クラウドモードを使用
+        firebaseManager.setUser(user);
+        setDataManager(firebaseManager);
         setIsCloudMode(true);
       } else {
-        // User is not authenticated, use local storage
+        // 認証が無効、または認証が有効でもユーザーがログインしていない場合、ローカルストレージを使用
         setDataManager(new LocalStorageManager());
         setIsCloudMode(false);
       }
     }
-  }, [user, loading, supabaseManager]);
+  }, [user, loading, isAuthEnabled, firebaseManager]);
 
   const switchToCloud = async (): Promise<void> => {
-    if (!user) {
-      throw new Error('User must be authenticated to switch to cloud mode');
+    if (!isAuthEnabled) {
+      throw new Error('認証機能が無効になっているため、クラウドモードに切り替えできません');
     }
     
-    supabaseManager.setUser(user);
-    setDataManager(supabaseManager);
+    if (!user) {
+      throw new Error('クラウドモードに切り替えるにはログインが必要です');
+    }
+    
+    firebaseManager.setUser(user);
+    setDataManager(firebaseManager);
     setIsCloudMode(true);
   };
 
@@ -59,32 +63,37 @@ export const DataManagerProvider: React.FC<DataManagerProviderProps> = ({ childr
   };
 
   const migrateToCloud = async (): Promise<boolean> => {
+    if (!isAuthEnabled) {
+      console.error('認証機能が無効になっているため、クラウドに移行できません');
+      return false;
+    }
+
     if (!user) {
-      console.error('Cannot migrate to cloud: user not authenticated');
+      console.error('クラウドに移行するにはログインが必要です');
       return false;
     }
 
     try {
-      // Get local storage data
+      // ローカルストレージからデータを取得
       const localManager = new LocalStorageManager();
       const localCards = await localManager.getAllCards();
       
       if (localCards.length === 0) {
-        return true; // Nothing to migrate
+        return true; // 移行するデータがない
       }
 
-      // Migrate to cloud
-      const result = await supabaseManager.migrateFromLocalStorage(localCards);
+      // クラウドに移行
+      const result = await firebaseManager.migrateFromLocalStorage(localCards);
       
       if (result.success) {
-        console.log(`Successfully migrated ${localCards.length} cards to cloud`);
+        console.log(`${localCards.length} 件のカードをクラウドに移行しました`);
         return true;
       } else {
-        console.error('Migration failed:', result.errors);
+        console.error('移行に失敗しました:', result.errors);
         return false;
       }
     } catch (error) {
-      console.error('Error during migration:', error);
+      console.error('移行中にエラーが発生しました:', error);
       return false;
     }
   };

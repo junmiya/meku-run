@@ -1,19 +1,55 @@
 'use client'
 
-import { AuthResponse, Session, User, AuthError } from '@supabase/supabase-js';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import {
+  User,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup,
+  sendPasswordResetEmail,
+  updateProfile
+} from 'firebase/auth';
+import { auth } from '../lib/firebase';
 
-import { createClient } from '../lib/supabase';
+// 認証有効/無効の制御
+const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED === 'true';
+
+// 匿名ユーザーの定義
+const ANONYMOUS_USER: User = {
+  uid: 'anonymous',
+  email: 'anonymous@example.com',
+  displayName: 'Anonymous User',
+  emailVerified: false,
+  photoURL: null,
+  phoneNumber: null,
+  providerId: 'firebase',
+  isAnonymous: true,
+  metadata: {
+    creationTime: new Date().toISOString(),
+    lastSignInTime: new Date().toISOString(),
+  },
+  providerData: [],
+  refreshToken: '',
+  tenantId: null,
+  delete: async () => {},
+  getIdToken: async () => '',
+  getIdTokenResult: async () => ({} as any),
+  reload: async () => {},
+  toJSON: () => ({}),
+} as User;
 
 interface AuthContextType {
   user: User | null;
-  session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, options?: { data?: { full_name?: string } }) => Promise<AuthResponse>;
-  signIn: (email: string, password: string) => Promise<AuthResponse>;
-  signInWithGoogle: () => Promise<{ data: { url: string }; error: null } | { data: { url: null }; error: AuthError }>;
+  signUp: (email: string, password: string, displayName: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
-  resetPassword: (email: string) => Promise<{ data: {}; error: null } | { data: null; error: AuthError }>;
+  resetPassword: (email: string) => Promise<void>;
+  isAuthEnabled: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,142 +68,96 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
 
   useEffect(() => {
-    // セッションを取得
-    const getSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Error getting session:', error);
-      } else {
-        setSession(session);
-        setUser(session?.user ?? null);
-      }
-      
+    if (!AUTH_ENABLED) {
+      // 認証無効の場合は匿名ユーザーを設定
+      setUser(ANONYMOUS_USER);
       setLoading(false);
-    };
+      return;
+    }
 
-    getSession();
+    // 認証有効の場合は Firebase Auth を使用
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setLoading(false);
+    });
 
-    // 認証状態の変更を監視
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session);
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-
-        // ユーザープロファイルの作成/更新（必要に応じて）
-        if (event === 'SIGNED_IN' && session?.user) {
-          await createOrUpdateProfile(session.user);
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
+    return unsubscribe;
   }, []);
 
-  // ユーザープロファイルの作成/更新
-  const createOrUpdateProfile = async (user: User) => {
-    try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .upsert([
-          {
-            id: user.id,
-            full_name: user.user_metadata?.full_name || null,
-            avatar_url: user.user_metadata?.avatar_url || null,
-            updated_at: new Date().toISOString(),
-          },
-        ]);
+  const signUp = async (email: string, password: string, displayName: string): Promise<void> => {
+    if (!AUTH_ENABLED) {
+      throw new Error('認証機能が無効になっています');
+    }
 
-      if (error) {
-        console.error('Error updating profile:', error);
-      }
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user, { displayName });
     } catch (error) {
-      console.error('Error in createOrUpdateProfile:', error);
+      throw error;
     }
   };
 
-  const signUp = async (
-    email: string, 
-    password: string, 
-    options?: { data?: { full_name?: string } }
-  ): Promise<AuthResponse> => {
-    setLoading(true);
-    
+  const signIn = async (email: string, password: string): Promise<void> => {
+    if (!AUTH_ENABLED) {
+      throw new Error('認証機能が無効になっています');
+    }
+
     try {
-      const response = await supabase.auth.signUp({
-        email,
-        password,
-        ...(options && { options }),
-      });
-      
-      return response;
-    } finally {
-      setLoading(false);
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      throw error;
     }
   };
 
-  const signIn = async (email: string, password: string): Promise<AuthResponse> => {
-    setLoading(true);
-    
+  const signInWithGoogle = async (): Promise<void> => {
+    if (!AUTH_ENABLED) {
+      throw new Error('認証機能が無効になっています');
+    }
+
     try {
-      const response = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      return response;
-    } finally {
-      setLoading(false);
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      throw error;
     }
   };
 
   const signOut = async (): Promise<void> => {
-    setLoading(true);
-    
+    if (!AUTH_ENABLED) {
+      throw new Error('認証機能が無効になっています');
+    }
+
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        throw error;
-      }
-    } finally {
-      setLoading(false);
+      await firebaseSignOut(auth);
+    } catch (error) {
+      throw error;
     }
   };
 
-  const resetPassword = async (email: string) => {
-    return await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-  };
+  const resetPassword = async (email: string): Promise<void> => {
+    if (!AUTH_ENABLED) {
+      throw new Error('認証機能が無効になっています');
+    }
 
-  const signInWithGoogle = async () => {
-    const redirectTo = `${window.location.origin}/auth/callback`;
-    
-    return await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo,
-      },
-    });
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error) {
+      throw error;
+    }
   };
 
   const value: AuthContextType = {
     user,
-    session,
     loading,
     signUp,
     signIn,
     signInWithGoogle,
     signOut,
     resetPassword,
+    isAuthEnabled: AUTH_ENABLED,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
