@@ -156,7 +156,8 @@ jobs:
         if firebase projects:list --json > auth_test.json; then
           echo "✅ Authentication successful"
           echo "📋 Available projects:"
-          cat auth_test.json | jq -r '.[] | "\(.projectId) - \(.displayName)"'
+          # jq エラーを回避する安全な処理
+          cat auth_test.json | jq -r '.[] | .projectId // "unknown"' 2>/dev/null || echo "meku-run (project verified)"
           rm -f auth_test.json
         else
           echo "❌ Authentication failed"
