@@ -1,288 +1,866 @@
 'use client';
 
-import { useState } from 'react';
-import { useAuth } from '../src/contexts/AuthContext';
-import AuthForm from '../src/components/Auth/AuthForm';
-import UserProfile from '../src/components/Auth/UserProfile';
-import LoadingSpinner from '../src/components/Auth/LoadingSpinner';
-import WordCard from '../src/components/WordCard';
-import CardForm from '../src/components/CardForm';
-import SearchFilter from '../src/components/SearchFilter';
-import Pagination from '../src/components/Pagination';
-import { MigrationDialog } from '../src/components/DataMigration/MigrationDialog';
-import { useWordCards } from '../src/hooks/useWordCards';
-import { useCardForm } from '../src/hooks/useCardForm';
-import { WordCard as WordCardType } from '../src/types/WordCard';
+import React, { useState, useEffect } from 'react';
+import { hyakuninIsshuData } from '../src/data/hyakunin-isshu-data';
+import { ResponsiveCardManager } from '../src/managers/ResponsiveCardManager';
+import { memorizationManager } from '../src/managers/MemorizationManager';
+import { HyakuninIsshuCard } from '../src/types/WordCard';
+import { getCardsByKimarijiLength, getKimarijiInfo, debugKimarijiClassification } from '../src/data/kimariji-data';
 
+
+
+// インラインスタイルを使用した百人一首メインページ
 export default function HomePage() {
-  const { user, loading, isAuthEnabled } = useAuth();
-
-  // デバッグ用ログ
-  console.log('HomePage - Auth Status:', { user, loading, isAuthEnabled });
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-  const [showUserProfile, setShowUserProfile] = useState(false);
-  const [showMigrationDialog, setShowMigrationDialog] = useState(false);
-
-  const {
-    cards,
-    filteredCards,
-    displayCards,
-    loading: cardsLoading,
-    error,
-    searchQuery,
-    setSearchQuery,
-    sortBy,
-    setSortBy,
-    sortOrder,
-    setSortOrder,
-    selectedTag,
-    setSelectedTag,
-    showStarredOnly,
-    setShowStarredOnly,
-    currentPage,
-    handlePageChange,
-    totalPages,
-    createCard,
-    updateCard,
-    deleteCard,
-    toggleStar,
-    loadSampleData,
-    availableTags,
-  } = useWordCards();
-
-  const [showForm, setShowForm] = useState(false);
-  const [editingCard, setEditingCard] = useState<WordCardType | undefined>();
-
-  const openFormForNew = () => {
-    setEditingCard(undefined);
-    setShowForm(true);
+  const [cards, setCards] = useState<HyakuninIsshuCard[]>([]);
+  const [displayCards, setDisplayCards] = useState<HyakuninIsshuCard[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
+  const [showSettings, setShowSettings] = useState(false);
+  const [memorizedCount, setMemorizedCount] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [cardsPerPage, setCardsPerPage] = useState(10);
+  
+  // 表示枚数変更処理
+  const handleCardsPerPageChange = (newCardsPerPage: number) => {
+    setCardsPerPage(newCardsPerPage);
+    const availableCards = filterCardsByKimarijiLength(cards.filter(card => !memorizationManager.isMemorized(card.id)));
+    setDisplayCards(availableCards.slice(0, newCardsPerPage));
   };
 
-  const openFormForEdit = (card: WordCardType) => {
-    setEditingCard(card);
-    setShowForm(true);
+  // 決まり字数でフィルタリング
+  const filterCardsByKimarijiLength = (cardsList: HyakuninIsshuCard[]) => {
+    if (kimarijiLengthFilter === 'all') return cardsList;
+    
+    const kimarijiCards = getCardsByKimarijiLength(kimarijiLengthFilter);
+    return cardsList.filter(card => kimarijiCards.includes(card.id));
   };
 
-  const closeForm = () => {
-    setShowForm(false);
-    setEditingCard(undefined);
+  // 決まり字数フィルター変更処理
+  const handleKimarijiLengthChange = (length: 'all' | 1 | 2 | 3 | 4 | 5) => {
+    setKimarijiLengthFilter(length);
+    const availableCards = cards.filter(card => !memorizationManager.isMemorized(card.id));
+    
+    // デバッグ: フィルタリング前の状態確認
+    console.log(`フィルター: ${length}字決まりを選択`);
+    console.log('利用可能なカード数:', availableCards.length);
+    if (length !== 'all') {
+      console.log('対象となる札ID:', getCardsByKimarijiLength(length));
+    }
+    
+    const filteredCards = length === 'all' ? availableCards : availableCards.filter(card => 
+      getCardsByKimarijiLength(length).includes(card.id)
+    );
+    
+    console.log('フィルタリング後のカード数:', filteredCards.length);
+    setDisplayCards(filteredCards.slice(0, cardsPerPage));
+  };
+  const [showKimariji, setShowKimariji] = useState(false);
+  const [hiraganaMode, setHiraganaMode] = useState(false);
+  const [kimarijiLengthFilter, setKimarijiLengthFilter] = useState<'all' | 1 | 2 | 3 | 4 | 5>('all');
+  const [isTrainingMode, setIsTrainingMode] = useState(false);
+  const [currentTrainingType, setCurrentTrainingType] = useState<'oneChar' | 'twoChar' | 'threeChar' | 'mixed'>('oneChar');
+  
+  const cardManager = ResponsiveCardManager.getInstance();
+
+  // 初期化
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        cardManager.setAllCards(hyakuninIsshuData);
+        const managedCards = cardManager.getRecommendedSet('desktop', 'beginner');
+        
+        setCards(managedCards);
+        setDisplayCards(managedCards.slice(0, 10));
+        setMemorizedCount(memorizationManager.getMemorizedCount());
+        setIsInitialized(true);
+        
+        // デバッグ: 決まり字データベースの状態確認
+        console.log('決まり字データベースの状態:');
+        debugKimarijiClassification();
+        console.log('1字決まり:', getCardsByKimarijiLength(1));
+        console.log('2字決まり:', getCardsByKimarijiLength(2));
+        console.log('3字決まり:', getCardsByKimarijiLength(3));
+        console.log('4字決まり:', getCardsByKimarijiLength(4));
+        console.log('5字決まり:', getCardsByKimarijiLength(5));
+      } catch (error) {
+        console.error('初期化エラー:', error);
+        setIsInitialized(true);
+      }
+    }
+  }, []);
+
+  // カードフリップ処理
+  const handleCardFlip = (cardId: number) => {
+    setFlippedCards(prev => {
+      const newFlipped = new Set(prev);
+      if (newFlipped.has(cardId)) {
+        newFlipped.delete(cardId);
+      } else {
+        newFlipped.add(cardId);
+      }
+      return newFlipped;
+    });
   };
 
-  const toggleAuthMode = () => {
-    setAuthMode(authMode === 'signin' ? 'signup' : 'signin');
-  };
-
-  const handleCreateCard = async (
-    cardData: Omit<WordCardType, 'id' | 'created_at' | 'updated_at'>
-  ) => {
-    await createCard(cardData);
-    closeForm();
-  };
-
-  const handleUpdateCard = async (
-    cardData: Omit<WordCardType, 'id' | 'created_at' | 'updated_at'>
-  ) => {
-    if (editingCard) {
-      await updateCard(editingCard.id, cardData);
-      closeForm();
+  // 覚えた処理
+  const handleMemorized = (cardId: number) => {
+    memorizationManager.toggleMemorized(cardId);
+    setMemorizedCount(memorizationManager.getMemorizedCount());
+    
+    // 覚えた札を表示リストから削除
+    if (memorizationManager.isMemorized(cardId)) {
+      const newDisplayCards = displayCards.filter(card => card.id !== cardId);
+      setDisplayCards(newDisplayCards);
+      
+      // 新しい札を追加（残りの札がある場合）
+      const remainingCards = cards.filter(card => 
+        !newDisplayCards.some(displayCard => displayCard.id === card.id) && 
+        !memorizationManager.isMemorized(card.id)
+      );
+      
+      if (remainingCards.length > 0 && newDisplayCards.length < cardsPerPage) {
+        const filteredRemainingCards = filterCardsByKimarijiLength(remainingCards);
+        if (filteredRemainingCards.length > 0) {
+          const nextCard = filteredRemainingCards[0];
+          if (nextCard) {
+            setDisplayCards([...newDisplayCards, nextCard]);
+          }
+        }
+      }
     }
   };
 
-  const handleDeleteCard = async (cardId: string) => {
-    if (window.confirm('この単語カードを削除しますか？')) {
-      await deleteCard(cardId);
-    }
+  // シャッフル処理
+  const handleShuffle = () => {
+    const shuffledCards = [...cards].sort(() => Math.random() - 0.5);
+    setCards(shuffledCards);
+    const availableCards = shuffledCards.filter(card => !memorizationManager.isMemorized(card.id));
+    const filteredCards = filterCardsByKimarijiLength(availableCards);
+    setDisplayCards(filteredCards.slice(0, cardsPerPage));
+    setFlippedCards(new Set());
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  // リセット処理
+  const handleReset = () => {
+    // 全ての記憶状態をリセット
+    hyakuninIsshuData.forEach(card => {
+      if (memorizationManager.isMemorized(card.id)) {
+        memorizationManager.toggleMemorized(card.id);
+      }
+    });
+    
+    setMemorizedCount(0);
+    const filteredCards = filterCardsByKimarijiLength(cards);
+    setDisplayCards(filteredCards.slice(0, cardsPerPage));
+    setFlippedCards(new Set());
+  };
 
-  if (!user) {
+  if (!isInitialized) {
     return (
-      <div style={{ padding: '20px' }}>
-        <h1>単語カードアプリ</h1>
-        <div style={{ background: '#f0f0f0', padding: '10px', margin: '10px 0', fontSize: '12px' }}>
-          <strong>デバッグ情報:</strong>
-          <br />
-          認証有効: {isAuthEnabled ? 'ON' : 'OFF'}
-          <br />
-          ユーザー: {user ? 'ログイン済み' : 'ログインなし'}
-          <br />
-          ローディング: {loading ? 'YES' : 'NO'}
+      <div style={{ 
+        minHeight: '100vh', 
+        background: 'linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ 
+            width: '48px', 
+            height: '48px', 
+            border: '4px solid #f3f4f6',
+            borderTop: '4px solid #3b82f6',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 16px'
+          }}></div>
+          <p style={{ color: '#6b7280' }}>百人一首データを読み込み中...</p>
         </div>
-        <p>ログインして単語カードの学習を始めましょう</p>
-        <AuthForm mode={authMode} onToggleMode={toggleAuthMode} />
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '20px',
-        }}
-      >
-        <h1>単語カードアプリ</h1>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button
-            onClick={() => setShowMigrationDialog(true)}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            データ移行
-          </button>
-          <button
-            onClick={() => setShowUserProfile(!showUserProfile)}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            {showUserProfile ? 'プロフィールを閉じる' : 'プロフィール'}
-          </button>
-        </div>
-      </div>
-
-      {showUserProfile && (
-        <div style={{ marginBottom: '20px' }}>
-          <UserProfile onClose={() => setShowUserProfile(false)} />
-        </div>
-      )}
-
-      <div style={{ marginBottom: '20px' }}>
-        <button
-          onClick={openFormForNew}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: '#28a745',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            marginRight: '10px',
-          }}
-        >
-          新しい単語カードを追加
-        </button>
-
-        {cards.length === 0 && (
-          <button
-            onClick={loadSampleData}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: '#6c757d',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '16px',
-            }}
-          >
-            サンプルデータを読み込み
-          </button>
-        )}
-      </div>
-
-      {showForm && (
-        <div style={{ marginBottom: '20px' }}>
-          <CardForm
-            card={editingCard}
-            onSave={editingCard ? handleUpdateCard : handleCreateCard}
-            onCancel={closeForm}
-          />
-        </div>
-      )}
-
-      {cards.length > 0 && (
-        <>
-          <SearchFilter
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            sortBy={sortBy}
-            onSortByChange={setSortBy}
-            sortOrder={sortOrder}
-            onSortOrderChange={setSortOrder}
-            selectedTag={selectedTag}
-            onSelectedTagChange={setSelectedTag}
-            showStarredOnly={showStarredOnly}
-            onShowStarredOnlyChange={setShowStarredOnly}
-            availableTags={availableTags}
-            totalCards={cards.length}
-            filteredCards={filteredCards.length}
-          />
-
-          {cardsLoading ? (
-            <LoadingSpinner />
-          ) : displayCards.length > 0 ? (
-            <>
-              <div
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%)',
+      padding: '16px',
+      position: 'relative'
+    }}>
+      {/* ヘッダー */}
+      <header style={{ marginBottom: '24px' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <h1 style={{ 
+            fontSize: '1.875rem', 
+            fontWeight: 'bold', 
+            color: '#1f2937',
+            textAlign: 'center', 
+            marginBottom: '16px'
+          }}>
+百人一首トレーニング
+          </h1>
+          
+          {/* モード切り替えタブ */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            marginBottom: '16px' 
+          }}>
+            <div style={{ 
+              backgroundColor: 'white', 
+              borderRadius: '8px', 
+              padding: '4px',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+              display: 'flex'
+            }}>
+              <button
+                onClick={() => setIsTrainingMode(false)}
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                  gap: '20px',
-                  margin: '20px 0',
+                  backgroundColor: !isTrainingMode ? '#3b82f6' : 'transparent',
+                  color: !isTrainingMode ? 'white' : '#6b7280',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: !isTrainingMode ? '600' : '400'
                 }}
               >
-                {displayCards.map(card => (
-                  <WordCard
-                    key={card.id}
-                    card={card}
-                    onEdit={() => openFormForEdit(card)}
-                    onDelete={() => handleDeleteCard(card.id)}
-                    onToggleStar={() => toggleStar(card.id)}
-                  />
-                ))}
+                通常モード
+              </button>
+              <button
+                onClick={() => setIsTrainingMode(true)}
+                style={{
+                  backgroundColor: isTrainingMode ? '#3b82f6' : 'transparent',
+                  color: isTrainingMode ? 'white' : '#6b7280',
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: isTrainingMode ? '600' : '400'
+                }}
+              >
+                トレーニングモード
+              </button>
+            </div>
+          </div>
+          
+          {/* 統計・制御パネル - 通常モード時のみ表示 */}
+          {!isTrainingMode && (
+            <div style={{ 
+              backgroundColor: 'white', 
+              borderRadius: '8px', 
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              padding: '16px', 
+              marginBottom: '16px'
+            }}>
+            <div style={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              gap: '16px'
+            }}>
+              <div style={{ 
+                display: 'flex', 
+                flexWrap: 'wrap', 
+                gap: '16px', 
+                fontSize: '0.875rem'
+              }}>
+                <span style={{ 
+                  backgroundColor: '#93c5fd', 
+                  color: 'white',
+                  padding: '8px 12px', 
+                  borderRadius: '9999px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '32px',
+                  lineHeight: '1'
+                }}>
+                  デバイス: PC
+                </span>
+                <div style={{ 
+                  backgroundColor: '#86efac', 
+                  color: 'white',
+                  padding: '8px 12px', 
+                  borderRadius: '9999px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '32px',
+                  lineHeight: '1',
+                  gap: '8px'
+                }}>
+                  表示: 
+                  <select
+                    value={cardsPerPage}
+                    onChange={(e) => handleCardsPerPageChange(Number(e.target.value))}
+                    style={{
+                      backgroundColor: 'white',
+                      color: '#166534',
+                      border: 'none',
+                      borderRadius: '4px',
+                      padding: '2px 4px',
+                      fontSize: '0.875rem',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value={5}>5枚</option>
+                    <option value={10}>10枚</option>
+                    <option value={15}>15枚</option>
+                    <option value={20}>20枚</option>
+                  </select>
+                </div>
+                <div style={{ 
+                  backgroundColor: '#c4b5fd', 
+                  color: 'white',
+                  padding: '8px 12px', 
+                  borderRadius: '9999px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '32px',
+                  lineHeight: '1',
+                  gap: '8px'
+                }}>
+                  覚えた: {memorizedCount}/{hyakuninIsshuData.length}首
+                  {memorizedCount > 0 && (
+                    <button
+                      onClick={handleReset}
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                        color: 'white',
+                        border: '1px solid rgba(255, 255, 255, 0.3)',
+                        borderRadius: '4px',
+                        padding: '2px 6px',
+                        fontSize: '0.75rem',
+                        cursor: 'pointer',
+                        lineHeight: '1'
+                      }}
+                    >
+                      リセット
+                    </button>
+                  )}
+                </div>
               </div>
-
-              {totalPages > 1 && (
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                  itemsPerPage={6}
-                  totalItems={filteredCards.length}
-                />
-              )}
-            </>
-          ) : (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
-              <p>条件に一致する単語カードが見つかりません。</p>
+              
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={handleShuffle}
+                  style={{
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+シャッフル
+                </button>
+                <button
+                  onClick={() => setShowKimariji(!showKimariji)}
+                  style={{
+                    backgroundColor: showKimariji ? '#f59e0b' : '#e5e7eb',
+                    color: showKimariji ? 'white' : '#374151',
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  決まり字 {showKimariji ? 'ON' : 'OFF'}
+                </button>
+                <button
+                  onClick={() => setHiraganaMode(!hiraganaMode)}
+                  style={{
+                    backgroundColor: hiraganaMode ? '#10b981' : '#e5e7eb',
+                    color: hiraganaMode ? 'white' : '#374151',
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '14px'
+                  }}
+                >
+                  ひらがな {hiraganaMode ? 'ON' : 'OFF'}
+                </button>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '8px',
+                  backgroundColor: '#f3f4f6',
+                  padding: '8px 12px',
+                  borderRadius: '6px'
+                }}>
+                  <span style={{ fontSize: '14px', color: '#374151' }}>決まり字数:</span>
+                  <select
+                    value={kimarijiLengthFilter}
+                    onChange={(e) => handleKimarijiLengthChange(e.target.value as 'all' | 1 | 2 | 3 | 4 | 5)}
+                    style={{
+                      backgroundColor: 'white',
+                      color: '#374151',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '4px',
+                      padding: '4px 8px',
+                      fontSize: '14px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="all">全て</option>
+                    <option value={1}>1字</option>
+                    <option value={2}>2字</option>
+                    <option value={3}>3字</option>
+                    <option value={4}>4字</option>
+                    <option value={5}>5字以上</option>
+                  </select>
+                </div>
+              </div>
+            </div>
             </div>
           )}
-        </>
-      )}
-
-      {error && (
-        <div
-          style={{
-            backgroundColor: '#f8d7da',
-            color: '#721c24',
-            padding: '12px',
-            borderRadius: '4px',
-            margin: '20px 0',
-          }}
-        >
-          エラー: {error}
         </div>
-      )}
+      </header>
 
-      <MigrationDialog isOpen={showMigrationDialog} onClose={() => setShowMigrationDialog(false)} />
+      {/* メインコンテンツ */}
+      <main style={{ maxWidth: '1200px', margin: '0 auto' }}>
+        {isTrainingMode ? (
+          // トレーニングモード
+          <div style={{ 
+            backgroundColor: 'white', 
+            borderRadius: '8px', 
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            padding: '24px' 
+          }}>
+            <h2 style={{ 
+              fontSize: '1.5rem', 
+              fontWeight: '600', 
+              color: '#1f2937', 
+              marginBottom: '24px',
+              textAlign: 'center'
+            }}>
+              基礎トレーニング
+            </h2>
+            
+            {/* トレーニングメニュー */}
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+              gap: '16px',
+              marginBottom: '24px'
+            }}>
+              <div 
+                onClick={() => setCurrentTrainingType('oneChar')}
+                style={{ 
+                  backgroundColor: currentTrainingType === 'oneChar' ? '#e0f2fe' : '#f8fafc',
+                  border: currentTrainingType === 'oneChar' ? '2px solid #0284c7' : '2px solid #e2e8f0',
+                  borderRadius: '8px', 
+                  padding: '20px', 
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <h3 style={{ 
+                  fontSize: '1.125rem', 
+                  fontWeight: '600', 
+                  color: '#1f2937', 
+                  marginBottom: '8px' 
+                }}>
+                  1字決まり練習
+                </h3>
+                <p style={{ 
+                  color: '#6b7280', 
+                  fontSize: '0.875rem',
+                  marginBottom: '8px'
+                }}>
+                  最も覚えやすい1字で決まる札から開始
+                </p>
+                <div style={{ 
+                  fontSize: '0.75rem', 
+                  color: '#059669',
+                  fontWeight: '500'
+                }}>
+                  推奨: 初心者
+                </div>
+              </div>
+              
+              <div 
+                onClick={() => setCurrentTrainingType('twoChar')}
+                style={{ 
+                  backgroundColor: currentTrainingType === 'twoChar' ? '#e0f2fe' : '#f8fafc',
+                  border: currentTrainingType === 'twoChar' ? '2px solid #0284c7' : '2px solid #e2e8f0',
+                  borderRadius: '8px', 
+                  padding: '20px', 
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <h3 style={{ 
+                  fontSize: '1.125rem', 
+                  fontWeight: '600', 
+                  color: '#1f2937', 
+                  marginBottom: '8px' 
+                }}>
+                  2字決まり練習
+                </h3>
+                <p style={{ 
+                  color: '#6b7280', 
+                  fontSize: '0.875rem',
+                  marginBottom: '8px'
+                }}>
+                  標準的な2字で決まる札の習得
+                </p>
+                <div style={{ 
+                  fontSize: '0.75rem', 
+                  color: '#d97706',
+                  fontWeight: '500'
+                }}>
+                  推奨: 中級者
+                </div>
+              </div>
+              
+              <div 
+                onClick={() => setCurrentTrainingType('threeChar')}
+                style={{ 
+                  backgroundColor: currentTrainingType === 'threeChar' ? '#e0f2fe' : '#f8fafc',
+                  border: currentTrainingType === 'threeChar' ? '2px solid #0284c7' : '2px solid #e2e8f0',
+                  borderRadius: '8px', 
+                  padding: '20px', 
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <h3 style={{ 
+                  fontSize: '1.125rem', 
+                  fontWeight: '600', 
+                  color: '#1f2937', 
+                  marginBottom: '8px' 
+                }}>
+                  3字以上決まり練習
+                </h3>
+                <p style={{ 
+                  color: '#6b7280', 
+                  fontSize: '0.875rem',
+                  marginBottom: '8px'
+                }}>
+                  難しい決まり字の上級練習
+                </p>
+                <div style={{ 
+                  fontSize: '0.75rem', 
+                  color: '#dc2626',
+                  fontWeight: '500'
+                }}>
+                  推奨: 上級者
+                </div>
+              </div>
+            </div>
+            
+            {/* 選択されたトレーニングの詳細 */}
+            <div style={{ 
+              backgroundColor: '#f1f5f9', 
+              borderRadius: '8px', 
+              padding: '20px',
+              border: '1px solid #e2e8f0'
+            }}>
+              <h3 style={{ 
+                fontSize: '1.125rem', 
+                fontWeight: '600', 
+                color: '#1f2937', 
+                marginBottom: '12px' 
+              }}>
+                {currentTrainingType === 'oneChar' && '1字決まり練習'}
+                {currentTrainingType === 'twoChar' && '2字決まり練習'}
+                {currentTrainingType === 'threeChar' && '3字以上決まり練習'}
+              </h3>
+              <p style={{ 
+                color: '#6b7280', 
+                marginBottom: '16px' 
+              }}>
+                {currentTrainingType === 'oneChar' && '「む・す・め・ふ・さ・ほ・せ」の7首を完全習得するまで反復練習します。'}
+                {currentTrainingType === 'twoChar' && '2字で決まる札を段階的に習得します。最も一般的な決まり字パターンです。'}
+                {currentTrainingType === 'threeChar' && '3字以上で決まる札の習得です。上級者向けの難しい決まり字です。'}
+              </p>
+              <button
+                onClick={() => {
+                  // トレーニング開始処理
+                  setIsTrainingMode(false);
+                  if (currentTrainingType === 'oneChar') {
+                    handleKimarijiLengthChange(1);
+                  } else if (currentTrainingType === 'twoChar') {
+                    handleKimarijiLengthChange(2);
+                  } else if (currentTrainingType === 'threeChar') {
+                    handleKimarijiLengthChange(3);
+                  }
+                }}
+                style={{
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  padding: '12px 24px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600'
+                }}
+              >
+                練習開始
+              </button>
+            </div>
+          </div>
+        ) : (
+          // 通常モード
+          displayCards.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '48px 0' }}>
+              <h2 style={{ 
+                fontSize: '1.5rem', 
+                fontWeight: '600', 
+                color: '#374151', 
+                marginBottom: '16px'
+              }}>
+                すべての句を覚えました！
+              </h2>
+              <p style={{ color: '#6b7280' }}>
+                復習モードに切り替えて復習することができます。
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* カードグリッド */}
+              <div style={{ 
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                gap: '12px',
+                maxWidth: '1200px', 
+                margin: '0 auto'
+              }}>
+                {displayCards.map((card) => (
+                <div
+                  key={card.id}
+                  onClick={() => handleCardFlip(card.id)}
+                  style={{
+                    backgroundColor: '#f8f6f0',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    transition: 'all 0.3s ease',
+                    // 百人一首の札の実際の比率（縦:横 = 1.1:1）
+                    aspectRatio: '1 / 1.1',
+                    width: '220px',
+                    flexShrink: 0
+                  }}
+                >
+                  {/* カード番号 */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '8px',
+                    left: '8px',
+                    fontSize: '0.75rem',
+                    color: '#6b7280',
+                    backgroundColor: '#f3f4f6',
+                    borderRadius: '50%',
+                    width: '24px',
+                    height: '24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    {card.id}
+                  </div>
+
+                  {/* 覚えたボタン */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMemorized(card.id);
+                    }}
+                    style={{
+                      position: 'absolute',
+                      top: '8px',
+                      right: '8px',
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      fontSize: '0.75rem',
+                      backgroundColor: memorizationManager.isMemorized(card.id) ? '#10b981' : '#e5e7eb',
+                      color: memorizationManager.isMemorized(card.id) ? 'white' : '#6b7280',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    ✓
+                  </button>
+
+                  {flippedCards.has(card.id) ? (
+                    // 裏面（下の句）
+                    <div style={{ 
+                      height: '100%', 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      justifyContent: 'space-between',
+                      minHeight: '180px',
+                      padding: '12px'
+                    }}>
+                      <div style={{ 
+                        flex: 1,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: '8px 6px'
+                      }}>
+                        <div
+                          style={{
+                            writingMode: 'vertical-rl',
+                            textOrientation: 'upright',
+                            direction: 'rtl',
+                            fontSize: '1.1rem',
+                            lineHeight: '1.8',
+                            textAlign: 'center',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontFamily: '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif',
+                            fontWeight: '700',
+                            color: '#1a1a1a',
+                            letterSpacing: '0.03em',
+                            whiteSpace: 'pre-line'
+                          }}
+                        >
+                          {hiraganaMode ? card.reading.shimoNoKu.replace(/\s+/g, '\n') : card.shimoNoKu.replace(/\s+/g, '\n')}
+                        </div>
+                      </div>
+                      
+                      {/* 決まり字表示（下の句） */}
+                      {showKimariji && card.kimariji && (
+                        <div style={{ 
+                          textAlign: 'center', 
+                          marginTop: '4px', 
+                          marginBottom: '4px',
+                          display: 'flex',
+                          justifyContent: 'center'
+                        }}>
+                          <div style={{ 
+                            fontSize: '0.6rem', 
+                            backgroundColor: '#fff7e6', 
+                            color: '#b45309',
+                            padding: '3px 4px', 
+                            borderRadius: '2px',
+                            fontFamily: '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif',
+                            fontWeight: '700',
+                            border: '1px solid #f3d19e',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            決まり字：{getKimarijiInfo(card.id)?.pattern || card.reading.kamiNoKu.replace(/\s+/g, '').substring(card.kimariji.position, card.kimariji.position + card.kimariji.length)}
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div style={{ 
+                        fontSize: '0.7rem', 
+                        color: '#444444', 
+                        textAlign: 'center',
+                        marginTop: '-50px',
+                        fontFamily: '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif',
+                        fontWeight: '500',
+                        letterSpacing: '0.05em',
+                        height: '30px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        {card.author}
+                      </div>
+                    </div>
+                  ) : (
+                    // 表面（上の句）
+                    <div style={{ 
+                      height: '100%', 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      justifyContent: 'space-between',
+                      minHeight: '180px',
+                      padding: '12px'
+                    }}>
+                      <div style={{ 
+                        flex: 1,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        padding: '8px 6px'
+                      }}>
+                        <div
+                          style={{
+                            writingMode: 'vertical-rl',
+                            textOrientation: 'upright',
+                            direction: 'rtl',
+                            fontSize: '1.1rem',
+                            lineHeight: '1.8',
+                            textAlign: 'center',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontFamily: '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif',
+                            fontWeight: '700',
+                            color: '#1a1a1a',
+                            letterSpacing: '0.03em',
+                            whiteSpace: 'pre-line'
+                          }}
+                        >
+                          {hiraganaMode ? card.reading.kamiNoKu.replace(/\s+/g, '\n') : card.kamiNoKu.replace(/\s+/g, '\n')}
+                        </div>
+                      </div>
+                      
+                      {/* 決まり字表示 */}
+                      {showKimariji && card.kimariji && (
+                        <div style={{ 
+                          textAlign: 'center', 
+                          marginTop: '4px', 
+                          marginBottom: '4px',
+                          display: 'flex',
+                          justifyContent: 'center'
+                        }}>
+                          <div style={{ 
+                            fontSize: '0.6rem', 
+                            backgroundColor: '#fff7e6', 
+                            color: '#b45309',
+                            padding: '3px 4px', 
+                            borderRadius: '2px',
+                            fontFamily: '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif',
+                            fontWeight: '700',
+                            border: '1px solid #f3d19e',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            決まり字：{getKimarijiInfo(card.id)?.pattern || card.reading.kamiNoKu.replace(/\s+/g, '').substring(card.kimariji.position, card.kimariji.position + card.kimariji.length)}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+              </div>
+            </>
+          )
+        )}
+      </main>
+
+      {/* スピンアニメーション用CSS */}
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
