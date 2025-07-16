@@ -44,6 +44,7 @@ const ANONYMOUS_USER: User = {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isLoggedIn: boolean;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -168,6 +169,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value: AuthContextType = {
     user,
     loading,
+    isLoggedIn: user !== null && !user.isAnonymous,
     signUp,
     signIn,
     signInWithGoogle,
