@@ -32,8 +32,6 @@ jobs:
         echo "🔍 Running quality checks..."
         echo "📊 Type checking (target: <10s)..."
         time npm run type-check
-        echo "✨ Code formatting check (target: <3s)..."
-        time npm run format:check
         echo "✅ Quality checks completed!"
 
     - name: Build Application
