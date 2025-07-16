@@ -61,7 +61,7 @@ export class ResponsiveCardManager {
    * デバイスタイプに最適なカード数を取得
    */
   getOptimalCardCount(deviceType: DeviceType): number {
-    const cardCounts = {
+    const cardCounts: Record<DeviceType, number> = {
       smartphone: 2,
       tablet: 12,
       desktop: 50,
