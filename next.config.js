@@ -2,8 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  output: 'export',
-  trailingSlash: true,
+  output: 'export', // Firebase Hosting用の静的エクスポート
+  trailingSlash: false,
   env: {
     NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyBJSobP7SJjT0kLDKx7cIrq2uCeTlKs978",
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "meku-run.firebaseapp.com",
