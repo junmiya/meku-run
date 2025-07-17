@@ -17,10 +17,10 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "あき",
-      category: 2,
-      conflictCards: [2, 3],
+      length: 3,
+      pattern: "あきの",
+      category: 3,
+      conflictCards: [],
       difficulty: "medium"
     },
     meaning: "秋の田の仮小屋の屋根の苫が粗いので、私の着物の袖は露に濡れてばかりいる"
@@ -37,10 +37,10 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "はる",
-      category: 2,
-      conflictCards: [1, 3],
+      length: 3,
+      pattern: "はるす",
+      category: 3,
+      conflictCards: [],
       difficulty: "medium"
     },
     meaning: "春が過ぎて夏がやってきたらしい。白い衣を干すという天の香具山に"
@@ -97,10 +97,10 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 3,
-      pattern: "おくや",
-      category: 3,
-      conflictCards: [4],
+      length: 2,
+      pattern: "おく",
+      category: 2,
+      conflictCards: [],
       difficulty: "medium"
     },
     meaning: "奥山で紅葉を踏み分けて鳴く鹿の声を聞く時こそ、秋は悲しいものだ"
@@ -117,8 +117,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 1,
-      pattern: "む",
+      length: 2,
+      pattern: "かさ",
       category: 1,
       conflictCards: [],
       difficulty: "easy"
@@ -137,9 +137,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "あま",
-      category: 2,
+      length: 3,
+      pattern: "あまの",
+      category: 3,
       conflictCards: [8],
       difficulty: "medium"
     },
@@ -177,9 +177,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "はな",
-      category: 2,
+      length: 3,
+      pattern: "はなの",
+      category: 3,
       conflictCards: [10],
       difficulty: "medium"
     },
@@ -217,10 +217,10 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "わた",
-      category: 2,
-      conflictCards: [12],
+      length: 6,
+      pattern: "わたのはらや",
+      category: 6,
+      conflictCards: [76],
       difficulty: "medium"
     },
     meaning: "大海原の多くの島々を目指して漕ぎ出したと、人に告げてくれ、海人の釣り舟よ"
@@ -237,9 +237,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "あまつかぜ",
-      category: 5,
+      length: 3,
+      pattern: "あまつ",
+      category: 3,
       conflictCards: [11],
       difficulty: "medium"
     },
@@ -297,10 +297,10 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "きみ",
-      category: 2,
-      conflictCards: [],
+      length: 6,
+      pattern: "きみがためは",
+      category: 6,
+      conflictCards: [50],
       difficulty: "easy"
     },
     meaning: "あなたのために春の野に出て若菜を摘む、私の袖に雪が降り続いている"
@@ -380,7 +380,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
       length: 2,
       pattern: "なに",
       category: 2,
-      conflictCards: [20],
+      conflictCards: [88, 89],
       difficulty: "medium"
     },
     meaning: "難波潟の短い蘆の節の間ほどの短い間も、逢わないでこの世を過ごせというのか"
@@ -417,9 +417,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "いま",
-      category: 2,
+      length: 3,
+      pattern: "いまこ",
+      category: 3,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -497,10 +497,10 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "なに",
-      category: 2,
-      conflictCards: [26],
+      length: 3,
+      pattern: "なにし",
+      category: 3,
+      conflictCards: [88, 89],
       difficulty: "medium"
     },
     meaning: "名前の通りなら、逢坂山のさねかづらのように、人に知られないで来る方法があればよいのに"
@@ -518,7 +518,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "おぐ",
+      pattern: "をぐ",
       category: 2,
       conflictCards: [25],
       difficulty: "medium"
@@ -537,9 +537,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "みか",
-      category: 2,
+      length: 3,
+      pattern: "みかの",
+      category: 3,
       conflictCards: [28],
       difficulty: "medium"
     },
@@ -557,9 +557,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "やま",
-      category: 2,
+      length: 3,
+      pattern: "やまざ",
+      category: 3,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -577,9 +577,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 3,
-      pattern: "こころあ",
-      category: 3,
+      length: 2,
+      pattern: "ここ",
+      category: 2,
       conflictCards: [],
       difficulty: "medium"
     },
@@ -617,10 +617,10 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 3,
-      pattern: "あさぼ",
-      category: 3,
-      conflictCards: [32],
+      length: 6,
+      pattern: "あさぼらけあ",
+      category: 6,
+      conflictCards: [64],
       difficulty: "medium"
     },
     meaning: "夜明けに有明の月と見えるまでに、吉野の里に降った白雪よ"
@@ -757,8 +757,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "わす",
+      length: 3,
+      pattern: "わすら",
       category: 2,
       conflictCards: [39],
       difficulty: "medium"
@@ -778,7 +778,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 3,
-      pattern: "あさじ",
+      pattern: "あさぢ",
       category: 3,
       conflictCards: [38],
       difficulty: "medium"
@@ -818,7 +818,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "こい",
+      pattern: "こひ",
       category: 2,
       conflictCards: [40],
       difficulty: "medium"
@@ -837,9 +837,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "ちぎ",
-      category: 2,
+      length: 4,
+      pattern: "ちぎりき",
+      category: 4,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -857,8 +857,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 3,
-      pattern: "あいみ",
+      length: 2,
+      pattern: "あひ",
       category: 3,
       conflictCards: [],
       difficulty: "easy"
@@ -878,7 +878,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 3,
-      pattern: "あうこ",
+      pattern: "あふこ",
       category: 3,
       conflictCards: [],
       difficulty: "easy"
@@ -898,7 +898,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 3,
-      pattern: "あわれ",
+      pattern: "あはれ",
       category: 3,
       conflictCards: [],
       difficulty: "easy"
@@ -938,7 +938,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "やえ",
+      pattern: "やへ",
       category: 2,
       conflictCards: [],
       difficulty: "easy"
@@ -997,10 +997,10 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 3,
-      pattern: "きみがた",
-      category: 3,
-      conflictCards: [],
+      length: 6,
+      pattern: "きみがためを",
+      category: 6,
+      conflictCards: [15],
       difficulty: "easy"
     },
     meaning: "あなたのために惜しくなかった命さえ、長くあってほしいと思ったことよ"
@@ -1057,8 +1057,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "なげ",
+      length: 3,
+      pattern: "なげき",
       category: 2,
       conflictCards: [54],
       difficulty: "medium"
@@ -1077,9 +1077,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "わすれじ",
-      category: 4,
+      length: 3,
+      pattern: "わすれ",
+      category: 3,
       conflictCards: [53],
       difficulty: "medium"
     },
@@ -1118,7 +1118,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 3,
-      pattern: "あらざら",
+      pattern: "あらざ",
       category: 3,
       conflictCards: [],
       difficulty: "medium"
@@ -1157,9 +1157,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "ありまの",
-      category: 4,
+      length: 3,
+      pattern: "ありま",
+      category: 3,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1177,8 +1177,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 3,
-      pattern: "やすらわ",
+      length: 2,
+      pattern: "やす",
       category: 3,
       conflictCards: [],
       difficulty: "medium"
@@ -1197,8 +1197,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "おおえやま",
+      length: 3,
+      pattern: "おほえ",
       category: 5,
       conflictCards: [],
       difficulty: "easy"
@@ -1217,8 +1217,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 3,
-      pattern: "いにしえ",
+      length: 2,
+      pattern: "いに",
       category: 3,
       conflictCards: [],
       difficulty: "medium"
@@ -1238,8 +1238,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "よをこめ",
-      category: 4,
+      pattern: "よを",
+      category: 2,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1257,9 +1257,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "いまはた",
-      category: 4,
+      length: 3,
+      pattern: "いまは",
+      category: 3,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1277,10 +1277,10 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 4,
-      pattern: "あさぼらけ",
-      category: 4,
-      conflictCards: [],
+      length: 6,
+      pattern: "あさぼらけう",
+      category: 6,
+      conflictCards: [31],
       difficulty: "easy"
     },
     meaning: "夜明けに宇治の川霧がところどころ切れて、現れて見える瀬々の網代木"
@@ -1298,8 +1298,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "うらみし",
-      category: 4,
+      pattern: "うら",
+      category: 2,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1318,8 +1318,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "もろとも",
-      category: 4,
+      pattern: "もろ",
+      category: 2,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1337,9 +1337,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "はるのよ",
-      category: 4,
+      length: 3,
+      pattern: "はるの",
+      category: 3,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1357,9 +1357,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
+      length: 4,
       pattern: "こころに",
-      category: 2,
+      category: 4,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1377,7 +1377,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
+      length: 3,
       pattern: "あらし",
       category: 2,
       conflictCards: [],
@@ -1418,8 +1418,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "ゆうされ",
-      category: 4,
+      pattern: "ゆふ",
+      category: 2,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1438,8 +1438,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "おとにき",
-      category: 4,
+      pattern: "おと",
+      category: 2,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1457,8 +1457,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 3,
-      pattern: "たかさ",
+      length: 2,
+      pattern: "たか",
       category: 3,
       conflictCards: [],
       difficulty: "medium"
@@ -1478,8 +1478,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "うかりけ",
-      category: 4,
+      pattern: "うか",
+      category: 2,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1497,9 +1497,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
+      length: 4,
       pattern: "ちぎりお",
-      category: 3,
+      category: 4,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1517,10 +1517,10 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 3,
-      pattern: "わたのは",
-      category: 3,
-      conflictCards: [],
+      length: 6,
+      pattern: "わたのはらこ",
+      category: 6,
+      conflictCards: [11],
       difficulty: "easy"
     },
     meaning: "大海原に漕ぎ出て見ると、空の雲居に見紛う沖の白波"
@@ -1557,8 +1557,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "あわじし",
+      length: 3,
+      pattern: "あはぢ",
       category: 3,
       conflictCards: [],
       difficulty: "easy"
@@ -1577,8 +1577,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "あきかぜ",
+      length: 3,
+      pattern: "あきか",
       category: 3,
       conflictCards: [],
       difficulty: "easy"
@@ -1597,9 +1597,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
+      length: 4,
       pattern: "ながから",
-      category: 3,
+      category: 4,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1638,8 +1638,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "おもいい",
-      category: 3,
+      pattern: "おも",
+      category: 2,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1657,8 +1657,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "よのなか",
+      length: 5,
+      pattern: "よのなかよ",
       category: 3,
       conflictCards: [],
       difficulty: "easy"
@@ -1677,8 +1677,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "ながらえ",
+      length: 3,
+      pattern: "ながら",
       category: 3,
       conflictCards: [],
       difficulty: "easy"
@@ -1698,8 +1698,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "よもすが",
-      category: 3,
+      pattern: "よも",
+      category: 2,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1717,8 +1717,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "なげけと",
+      length: 3,
+      pattern: "なげけ",
       category: 3,
       conflictCards: [],
       difficulty: "easy"
@@ -1737,8 +1737,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "むらさき",
+      length: 1,
+      pattern: "む",
       category: 3,
       conflictCards: [],
       difficulty: "easy"
@@ -1757,9 +1757,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "なにわ",
-      category: 2,
+      length: 4,
+      pattern: "なにはえ",
+      category: 4,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1778,8 +1778,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "たまのお",
-      category: 4,
+      pattern: "たま",
+      category: 2,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1798,8 +1798,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "みせばや",
-      category: 4,
+      pattern: "みせ",
+      category: 2,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1818,8 +1818,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "きりぎす",
-      category: 4,
+      pattern: "きり",
+      category: 2,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1837,9 +1837,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "わがそで",
-      category: 4,
+      length: 3,
+      pattern: "わがそ",
+      category: 3,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1857,9 +1857,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "よのなか",
-      category: 2,
+      length: 5,
+      pattern: "よのなかは",
+      category: 5,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1878,8 +1878,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "みよしの",
-      category: 4,
+      pattern: "みよ",
+      category: 2,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1897,9 +1897,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "おおけな",
-      category: 4,
+      length: 3,
+      pattern: "おほけ",
+      category: 3,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1917,9 +1917,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "はなさえ",
-      category: 4,
+      length: 3,
+      pattern: "はなさ",
+      category: 3,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1938,8 +1938,8 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "こぬひと",
-      category: 4,
+      pattern: "こぬ",
+      category: 2,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1957,9 +1957,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "かぜそよ",
-      category: 4,
+      length: 3,
+      pattern: "かぜそ",
+      category: 3,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1977,7 +1977,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
+      length: 4,
       pattern: "ひともお",
       category: 4,
       conflictCards: [],
@@ -1998,7 +1998,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     kimariji: {
       position: 0,
       length: 2,
-      pattern: "ももし",
+      pattern: "もも",
       category: 2,
       conflictCards: [],
       difficulty: "easy"
