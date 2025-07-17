@@ -119,7 +119,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
       position: 0,
       length: 2,
       pattern: "かさ",
-      category: 1,
+      category: 2,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -477,9 +477,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "この",
-      category: 2,
+      length: 3,
+      pattern: "このた",
+      category: 3,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -759,7 +759,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
       position: 0,
       length: 3,
       pattern: "わすら",
-      category: 2,
+      category: 3,
       conflictCards: [39],
       difficulty: "medium"
     },
@@ -859,7 +859,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
       position: 0,
       length: 2,
       pattern: "あひ",
-      category: 3,
+      category: 2,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1059,7 +1059,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
       position: 0,
       length: 3,
       pattern: "なげき",
-      category: 2,
+      category: 3,
       conflictCards: [54],
       difficulty: "medium"
     },
@@ -1179,7 +1179,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
       position: 0,
       length: 2,
       pattern: "やす",
-      category: 3,
+      category: 2,
       conflictCards: [],
       difficulty: "medium"
     },
@@ -1199,7 +1199,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
       position: 0,
       length: 3,
       pattern: "おほえ",
-      category: 5,
+      category: 3,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1219,7 +1219,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
       position: 0,
       length: 2,
       pattern: "いに",
-      category: 3,
+      category: 2,
       conflictCards: [],
       difficulty: "medium"
     },
@@ -1379,7 +1379,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
       position: 0,
       length: 3,
       pattern: "あらし",
-      category: 2,
+      category: 3,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1659,7 +1659,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
       position: 0,
       length: 5,
       pattern: "よのなかよ",
-      category: 3,
+      category: 5,
       conflictCards: [],
       difficulty: "easy"
     },
@@ -1739,7 +1739,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
       position: 0,
       length: 1,
       pattern: "む",
-      category: 3,
+      category: 1,
       conflictCards: [],
       difficulty: "easy"
     },
