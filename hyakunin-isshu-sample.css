@@ -1,0 +1,230 @@
+/* 百人一首データベース - CSS変数形式サンプル
+ * このファイルは百人一首データをCSS変数として定義したサンプルです
+ * 
+ * 使用方法:
+ * 1. 各札の情報をCSS変数として定義
+ * 2. JavaScriptで getComputedStyle() を使用してデータを取得
+ * 3. JSON形式に変換してアプリケーションで使用
+ */
+
+:root {
+  /* ===== 札1番: 天智天皇 ===== */
+  --card-1-id: 1;
+  --card-1-kami-no-ku: "秋の田の かりほの庵の 苫をあらみ";
+  --card-1-shimo-no-ku: "わが衣手は 露にぬれつつ";
+  --card-1-author: "天智天皇";
+  --card-1-reading-kami: "あきのたの かりほのいおの とまをあらみ";
+  --card-1-reading-shimo: "わがころもでは つゆにぬれつつ";
+  --card-1-reading-author: "てんちてんのう";
+  --card-1-kimariji-pattern: "あきの";
+  --card-1-kimariji-length: 3;
+  --card-1-kimariji-category: 3;
+  --card-1-kimariji-difficulty: "medium";
+  --card-1-meaning: "秋の田の仮小屋の屋根の苫が粗いので、私の着物の袖は露に濡れてばかりいる";
+  --card-1-notes: "秋の季節感あふれる歌";
+
+  /* ===== 札2番: 持統天皇 ===== */
+  --card-2-id: 2;
+  --card-2-kami-no-ku: "春すぎて 夏来にけらし 白妙の";
+  --card-2-shimo-no-ku: "衣ほすてふ 天の香具山";
+  --card-2-author: "持統天皇";
+  --card-2-reading-kami: "はるすぎて なつきにけらし しろたえの";
+  --card-2-reading-shimo: "ころもほすちょう あまのかぐやま";
+  --card-2-reading-author: "じとうてんのう";
+  --card-2-kimariji-pattern: "はるす";
+  --card-2-kimariji-length: 3;
+  --card-2-kimariji-category: 3;
+  --card-2-kimariji-difficulty: "medium";
+  --card-2-meaning: "春が過ぎて夏がやってきたらしい。白い衣を干すという天の香具山に";
+  --card-2-notes: "季節の移り変わりを詠んだ歌";
+
+  /* ===== 札3番: 柿本人麻呂 ===== */
+  --card-3-id: 3;
+  --card-3-kami-no-ku: "あしひきの 山鳥の尾の しだり尾の";
+  --card-3-shimo-no-ku: "ながながし夜を ひとりかも寝む";
+  --card-3-author: "柿本人麻呂";
+  --card-3-reading-kami: "あしひきの やまどりのおの しだりおの";
+  --card-3-reading-shimo: "ながながしよを ひとりかもねん";
+  --card-3-reading-author: "かきのもとのひとまろ";
+  --card-3-kimariji-pattern: "あし";
+  --card-3-kimariji-length: 2;
+  --card-3-kimariji-category: 2;
+  --card-3-kimariji-difficulty: "easy";
+  --card-3-meaning: "山鳥の長く垂れ下がった尾のように、長い夜を一人で寝るのだろうか";
+  --card-3-notes: "孤独感を表現した代表的な歌";
+
+  /* ===== 札4番: 山部赤人 ===== */
+  --card-4-id: 4;
+  --card-4-kami-no-ku: "田子の浦に うち出でてみれば 白妙の";
+  --card-4-shimo-no-ku: "富士の高嶺に 雪は降りつつ";
+  --card-4-author: "山部赤人";
+  --card-4-reading-kami: "たごのうらに うちいでてみれば しろたえの";
+  --card-4-reading-shimo: "ふじのたかねに ゆきはふりつつ";
+  --card-4-reading-author: "やまべのあかひと";
+  --card-4-kimariji-pattern: "たごの";
+  --card-4-kimariji-length: 3;
+  --card-4-kimariji-category: 3;
+  --card-4-kimariji-difficulty: "medium";
+  --card-4-meaning: "田子の浦に出て見ると、富士の高い峰に雪が降り続いている";
+  --card-4-notes: "富士山を詠んだ代表的な歌";
+
+  /* ===== 札5番: 猿丸大夫 ===== */
+  --card-5-id: 5;
+  --card-5-kami-no-ku: "奥山に 紅葉踏み分け 鳴く鹿の";
+  --card-5-shimo-no-ku: "声聞く時ぞ 秋は悲しき";
+  --card-5-author: "猿丸大夫";
+  --card-5-reading-kami: "おくやまに もみじふみわけ なくしかの";
+  --card-5-reading-shimo: "こえきくときぞ あきはかなしき";
+  --card-5-reading-author: "さるまるたゆう";
+  --card-5-kimariji-pattern: "おく";
+  --card-5-kimariji-length: 2;
+  --card-5-kimariji-category: 2;
+  --card-5-kimariji-difficulty: "easy";
+  --card-5-meaning: "奥山で紅葉を踏み分けて鳴く鹿の声を聞く時こそ、秋は悲しいものだ";
+  --card-5-notes: "秋の情緒を表現した名歌";
+
+  /* ===== 札18番: 藤原敏行朝臣（1字決まりサンプル） ===== */
+  --card-18-id: 18;
+  --card-18-kami-no-ku: "住の江の 岸に寄る波 よるさへや";
+  --card-18-shimo-no-ku: "夢の通ひ路 人目よくらむ";
+  --card-18-author: "藤原敏行朝臣";
+  --card-18-reading-kami: "すみのえの きしによるなみ よるさえや";
+  --card-18-reading-shimo: "ゆめのかよいじ ひとめよくらん";
+  --card-18-reading-author: "ふじわらのとしゆきあそん";
+  --card-18-kimariji-pattern: "す";
+  --card-18-kimariji-length: 1;
+  --card-18-kimariji-category: 1;
+  --card-18-kimariji-difficulty: "easy";
+  --card-18-meaning: "住の江の岸に寄せる波のように、夜さえも夢の通い路で人目を避けているのだろうか";
+  --card-18-notes: "1字決まり「す」- むすめふさほせの一つ";
+
+  /* ===== 札22番: 文屋康秀（1字決まりサンプル） ===== */
+  --card-22-id: 22;
+  --card-22-kami-no-ku: "吹くからに 秋の草木の しをるれば";
+  --card-22-shimo-no-ku: "むべ山風を 嵐といふらむ";
+  --card-22-author: "文屋康秀";
+  --card-22-reading-kami: "ふくからに あきのくさきの しおるれば";
+  --card-22-reading-shimo: "むべやまかぜを あらしというらん";
+  --card-22-reading-author: "ぶんやのやすひで";
+  --card-22-kimariji-pattern: "ふ";
+  --card-22-kimariji-length: 1;
+  --card-22-kimariji-category: 1;
+  --card-22-kimariji-difficulty: "easy";
+  --card-22-meaning: "吹くと同時に秋の草木がしおれるので、山風を嵐というのも当然だろう";
+  --card-22-notes: "1字決まり「ふ」- むすめふさほせの一つ";
+
+  /* ===== 札42番: 清原元輔（4字決まりサンプル） ===== */
+  --card-42-id: 42;
+  --card-42-kami-no-ku: "契りきな かたみに袖を しぼりつつ";
+  --card-42-shimo-no-ku: "末の松山 波越さじとは";
+  --card-42-author: "清原元輔";
+  --card-42-reading-kami: "ちぎりきな かたみにそでを しぼりつつ";
+  --card-42-reading-shimo: "すえのまつやま なみこさじとは";
+  --card-42-reading-author: "きよはらのもとすけ";
+  --card-42-kimariji-pattern: "ちぎりき";
+  --card-42-kimariji-length: 4;
+  --card-42-kimariji-category: 4;
+  --card-42-kimariji-difficulty: "hard";
+  --card-42-meaning: "約束したではないか。お互いに袖を絞りながら、末の松山を波が越すことはないと";
+  --card-42-notes: "4字決まり - 恋の歌の代表例";
+
+  /* ===== 札83番: 皇太后宮大夫俊成（5字決まりサンプル） ===== */
+  --card-83-id: 83;
+  --card-83-kami-no-ku: "世の中よ 道こそなけれ 思ひ入る";
+  --card-83-shimo-no-ku: "山の奥にも 鹿ぞ鳴くなる";
+  --card-83-author: "皇太后宮大夫俊成";
+  --card-83-reading-kami: "よのなかよ みちこそなけれ おもいいる";
+  --card-83-reading-shimo: "やまのおくにも しかぞなくなる";
+  --card-83-reading-author: "こうたいごうぐうのだいぶとしなり";
+  --card-83-kimariji-pattern: "よのなかよ";
+  --card-83-kimariji-length: 5;
+  --card-83-kimariji-category: 5;
+  --card-83-kimariji-difficulty: "hard";
+  --card-83-meaning: "この世には道がないのだなあ。思い入る山の奥にも鹿が鳴いている";
+  --card-83-notes: "5字決まり - 2枚のうちの1枚";
+
+  /* ===== 札76番: 法性寺入道前関白太政大臣（6字決まりサンプル） ===== */
+  --card-76-id: 76;
+  --card-76-kami-no-ku: "わたの原 漕ぎ出でて見れば ひさかたの";
+  --card-76-shimo-no-ku: "雲居にまがふ 沖つ白波";
+  --card-76-author: "法性寺入道前関白太政大臣";
+  --card-76-reading-kami: "わたのはら こぎいでてみれば ひさかたの";
+  --card-76-reading-shimo: "くもいにまがう おきつしらなみ";
+  --card-76-reading-author: "ほうしょうじにゅうどうさきのかんぱくだいじょうだいじん";
+  --card-76-kimariji-pattern: "わたのはらこ";
+  --card-76-kimariji-length: 6;
+  --card-76-kimariji-category: 6;
+  --card-76-kimariji-difficulty: "hard";
+  --card-76-meaning: "大海原に漕ぎ出て見ると、空の雲居に見紛う沖の白波";
+  --card-76-notes: "6字決まり - わたのはら系の札";
+}
+
+/* ===== CSS変数からJavaScriptでデータを取得する例 ===== */
+/*
+// JavaScript側での使用例
+function getCardData(cardId) {
+  const style = getComputedStyle(document.documentElement);
+  return {
+    id: parseInt(style.getPropertyValue(`--card-${cardId}-id`).trim()),
+    kamiNoKu: style.getPropertyValue(`--card-${cardId}-kami-no-ku`).trim().replace(/['"]/g, ''),
+    shimoNoKu: style.getPropertyValue(`--card-${cardId}-shimo-no-ku`).trim().replace(/['"]/g, ''),
+    author: style.getPropertyValue(`--card-${cardId}-author`).trim().replace(/['"]/g, ''),
+    reading: {
+      kamiNoKu: style.getPropertyValue(`--card-${cardId}-reading-kami`).trim().replace(/['"]/g, ''),
+      shimoNoKu: style.getPropertyValue(`--card-${cardId}-reading-shimo`).trim().replace(/['"]/g, ''),
+      author: style.getPropertyValue(`--card-${cardId}-reading-author`).trim().replace(/['"]/g, '')
+    },
+    kimariji: {
+      pattern: style.getPropertyValue(`--card-${cardId}-kimariji-pattern`).trim().replace(/['"]/g, ''),
+      length: parseInt(style.getPropertyValue(`--card-${cardId}-kimariji-length`).trim()),
+      category: parseInt(style.getPropertyValue(`--card-${cardId}-kimariji-category`).trim()),
+      difficulty: style.getPropertyValue(`--card-${cardId}-kimariji-difficulty`).trim().replace(/['"]/g, '')
+    },
+    meaning: style.getPropertyValue(`--card-${cardId}-meaning`).trim().replace(/['"]/g, ''),
+    notes: style.getPropertyValue(`--card-${cardId}-notes`).trim().replace(/['"]/g, '')
+  };
+}
+
+// 全カードデータを取得
+function getAllCards() {
+  const cards = [];
+  for (let i = 1; i <= 100; i++) {
+    const cardData = getCardData(i);
+    if (cardData.id) {
+      cards.push(cardData);
+    }
+  }
+  return cards;
+}
+*/
+
+/* ===== 決まり字分布検証用CSS ===== */
+:root {
+  /* 決まり字分布の標準値 */
+  --kimariji-1-moji-standard: 7;   /* むすめふさほせ */
+  --kimariji-2-moji-standard: 42;
+  --kimariji-3-moji-standard: 37;
+  --kimariji-4-moji-standard: 6;
+  --kimariji-5-moji-standard: 2;
+  --kimariji-6-moji-standard: 6;
+  
+  /* 合計 */
+  --total-cards: 100;
+}
+
+/* ===== テンプレート ===== */
+/*
+--card-N-id: N;
+--card-N-kami-no-ku: "上の句";
+--card-N-shimo-no-ku: "下の句";
+--card-N-author: "作者名";
+--card-N-reading-kami: "上の句読み";
+--card-N-reading-shimo: "下の句読み";
+--card-N-reading-author: "作者読み";
+--card-N-kimariji-pattern: "決まり字";
+--card-N-kimariji-length: X;
+--card-N-kimariji-category: X;
+--card-N-kimariji-difficulty: "easy/medium/hard";
+--card-N-meaning: "現代語訳";
+--card-N-notes: "覚え方のヒント";
+*/

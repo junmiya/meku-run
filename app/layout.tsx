@@ -1,19 +1,20 @@
-import { AuthProvider } from '../src/contexts/AuthContext';
-import { DataManagerProvider } from '../src/contexts/DataManagerContext';
 import './globals.css';
+import { ClientProviders } from '../src/components/ClientProviders';
 
 export const metadata = {
-  title: '単語カードアプリ',
-  description: 'Google認証対応の単語学習アプリ',
+  title: '百人一首トレーニング',
+  description: '縦書き表示対応の百人一首学習アプリ',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ja">
       <body>
-        <AuthProvider>
-          <DataManagerProvider>{children}</DataManagerProvider>
-        </AuthProvider>
+        <div id="root">
+          <ClientProviders>
+            {children}
+          </ClientProviders>
+        </div>
       </body>
     </html>
   );

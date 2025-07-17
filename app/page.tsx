@@ -9,11 +9,15 @@ import { PerformanceManager } from '../src/managers/PerformanceManager';
 import { HyakuninIsshuCard } from '../src/types/WordCard';
 import { getCardsByKimarijiLength, getKimarijiInfo, debugKimarijiClassification } from '../src/data/kimariji-data';
 import { Timer, CompetitionModeSelect } from '../src/components/Timer';
+import { AuthProvider, useAuth } from '../src/contexts/AuthContext';
+import ConditionalAuthGuard from '../src/components/Auth/ConditionalAuthGuard';
+import UserLoginButton from '../src/components/Header/UserLoginButton';
 
 
 
 // インラインスタイルを使用した百人一首メインページ
-export default function HomePage() {
+function HyakuninIsshuApp() {
+  const { user, isLoggedIn } = useAuth();
   const [cards, setCards] = useState<HyakuninIsshuCard[]>([]);
   const [displayCards, setDisplayCards] = useState<HyakuninIsshuCard[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -92,6 +96,18 @@ export default function HomePage() {
   const cardManager = ResponsiveCardManager.getInstance();
   const trainingGameManager = TrainingGameManager.getInstance();
   const performanceManager = PerformanceManager.getInstance();
+  
+  // ユーザー情報が変更されたらマネージャーに設定
+  useEffect(() => {
+    performanceManager.setUser(user);
+    trainingGameManager.setUser(user);
+    
+    // ログアウト時はトレーニングモード・競技モードを無効化
+    if (!isLoggedIn && (isTrainingMode || isCompetitionMode)) {
+      setIsTrainingMode(false);
+      setIsCompetitionMode(false);
+    }
+  }, [user, isLoggedIn, performanceManager, trainingGameManager, isTrainingMode, isCompetitionMode]);
 
   // 初期化
   useEffect(() => {
@@ -376,13 +392,24 @@ export default function HomePage() {
     }}>
       {/* ヘッダー */}
       <header style={{ marginBottom: '24px' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', position: 'relative' }}>
+          {/* ログインボタン（右上） */}
+          <div style={{
+            position: 'absolute',
+            top: '0',
+            right: '0',
+            zIndex: 10
+          }}>
+            <UserLoginButton />
+          </div>
+          
           <h1 style={{ 
             fontSize: '1.875rem', 
             fontWeight: 'bold', 
             color: '#1f2937',
             textAlign: 'center', 
-            marginBottom: '16px'
+            marginBottom: '16px',
+            paddingTop: '8px'
           }}>
 百人一首トレーニング
           </h1>
@@ -401,40 +428,114 @@ export default function HomePage() {
               display: 'flex'
             }}>
               <button
-                onClick={() => setIsTrainingMode(false)}
+                onClick={() => {
+                  setIsTrainingMode(false);
+                  setIsCompetitionMode(false);
+                }}
                 style={{
-                  backgroundColor: !isTrainingMode ? '#3b82f6' : 'transparent',
-                  color: !isTrainingMode ? 'white' : '#6b7280',
+                  backgroundColor: !isTrainingMode && !isCompetitionMode ? '#3b82f6' : 'transparent',
+                  color: !isTrainingMode && !isCompetitionMode ? 'white' : '#6b7280',
                   padding: '8px 16px',
                   borderRadius: '4px',
                   border: 'none',
                   cursor: 'pointer',
                   fontSize: '14px',
-                  fontWeight: !isTrainingMode ? '600' : '400'
+                  fontWeight: !isTrainingMode && !isCompetitionMode ? '600' : '400'
                 }}
               >
                 通常モード
               </button>
               <button
-                onClick={() => setIsTrainingMode(true)}
+                onClick={() => {
+                  if (isLoggedIn) {
+                    setIsTrainingMode(true);
+                    setIsCompetitionMode(false);
+                  }
+                }}
+                disabled={!isLoggedIn}
+                title={!isLoggedIn ? "ログインが必要です" : ""}
                 style={{
-                  backgroundColor: isTrainingMode ? '#3b82f6' : 'transparent',
-                  color: isTrainingMode ? 'white' : '#6b7280',
+                  backgroundColor: isTrainingMode && !isCompetitionMode ? '#3b82f6' : 'transparent',
+                  color: !isLoggedIn ? '#9ca3af' : (isTrainingMode && !isCompetitionMode ? 'white' : '#6b7280'),
                   padding: '8px 16px',
                   borderRadius: '4px',
                   border: 'none',
-                  cursor: 'pointer',
+                  cursor: isLoggedIn ? 'pointer' : 'not-allowed',
                   fontSize: '14px',
-                  fontWeight: isTrainingMode ? '600' : '400'
+                  fontWeight: isTrainingMode && !isCompetitionMode ? '600' : '400',
+                  opacity: isLoggedIn ? 1 : 0.5,
+                  transition: 'all 0.2s ease',
+                  position: 'relative'
                 }}
               >
                 トレーニングモード
+                {!isLoggedIn && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    right: '-4px',
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor: '#ef4444',
+                    borderRadius: '50%',
+                    fontSize: '10px',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    🔒
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  if (isLoggedIn) {
+                    setIsTrainingMode(false);
+                    setIsCompetitionMode(true);
+                  }
+                }}
+                disabled={!isLoggedIn}
+                title={!isLoggedIn ? "ログインが必要です" : ""}
+                style={{
+                  backgroundColor: isCompetitionMode ? '#10b981' : 'transparent',
+                  color: !isLoggedIn ? '#9ca3af' : (isCompetitionMode ? 'white' : '#6b7280'),
+                  padding: '8px 16px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: isLoggedIn ? 'pointer' : 'not-allowed',
+                  fontSize: '14px',
+                  fontWeight: isCompetitionMode ? '600' : '400',
+                  opacity: isLoggedIn ? 1 : 0.5,
+                  transition: 'all 0.2s ease',
+                  position: 'relative'
+                }}
+              >
+                競技モード
+                {!isLoggedIn && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    right: '-4px',
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor: '#ef4444',
+                    borderRadius: '50%',
+                    fontSize: '10px',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    🔒
+                  </span>
+                )}
               </button>
             </div>
           </div>
           
           {/* 統計・制御パネル - 通常モード時のみ表示 */}
-          {!isTrainingMode && (
+          {!isTrainingMode && !isCompetitionMode && (
             <div style={{ 
               backgroundColor: 'white', 
               borderRadius: '8px', 
@@ -616,14 +717,103 @@ export default function HomePage() {
 
       {/* メインコンテンツ */}
       <main style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        {isTrainingMode ? (
-          // トレーニングモード
-          <div style={{ 
-            backgroundColor: 'white', 
-            borderRadius: '8px', 
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            padding: '24px' 
-          }}>
+        {isCompetitionMode ? (
+          // 競技モード - ログイン必須
+          <ConditionalAuthGuard requireAuth={true}>
+            <div style={{ 
+              backgroundColor: 'white', 
+              borderRadius: '8px', 
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              padding: '24px',
+              textAlign: 'center'
+            }}>
+            <h2 style={{ 
+              fontSize: '1.5rem', 
+              fontWeight: '600', 
+              color: '#1f2937', 
+              marginBottom: '24px'
+            }}>
+              競技トレーニングモード
+            </h2>
+            
+            {/* タイマー表示 */}
+            <div style={{ marginBottom: '24px' }}>
+              <Timer
+                timeRemaining={trainingGameManager.getCurrentState().timeRemaining}
+                totalTime={competitionSettings.timeLimit}
+                phase={trainingGameManager.getCurrentState().currentPhase}
+              />
+            </div>
+            
+            {/* 競技統計 */}
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              gap: '16px',
+              marginBottom: '24px'
+            }}>
+              <div style={{ 
+                backgroundColor: '#f3f4f6',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '18px', fontWeight: '600', color: '#1f2937' }}>
+                  {trainingGameManager.getCurrentState().sessionStats.correctAnswers}
+                </div>
+                <div style={{ fontSize: '12px', color: '#6b7280' }}>正解</div>
+              </div>
+              <div style={{ 
+                backgroundColor: '#f3f4f6',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '18px', fontWeight: '600', color: '#1f2937' }}>
+                  {trainingGameManager.getCurrentState().sessionStats.totalAttempts}
+                </div>
+                <div style={{ fontSize: '12px', color: '#6b7280' }}>試行</div>
+              </div>
+              <div style={{ 
+                backgroundColor: '#f3f4f6',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '18px', fontWeight: '600', color: '#1f2937' }}>
+                  {trainingGameManager.getCurrentState().sessionStats.currentStreak}
+                </div>
+                <div style={{ fontSize: '12px', color: '#6b7280' }}>連続</div>
+              </div>
+            </div>
+            
+            {/* 競技終了ボタン */}
+            <button
+              onClick={endCompetitionMode}
+              style={{
+                backgroundColor: '#dc2626',
+                color: 'white',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: '600'
+              }}
+            >
+              競技終了
+            </button>
+            </div>
+          </ConditionalAuthGuard>
+        ) : isTrainingMode ? (
+          // トレーニングモード - ログイン必須
+          <ConditionalAuthGuard requireAuth={true}>
+            <div style={{ 
+              backgroundColor: 'white', 
+              borderRadius: '8px', 
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              padding: '24px' 
+            }}>
             <h2 style={{ 
               fontSize: '1.5rem', 
               fontWeight: '600', 
@@ -798,7 +988,8 @@ export default function HomePage() {
                 練習開始
               </button>
             </div>
-          </div>
+            </div>
+          </ConditionalAuthGuard>
         ) : (
           // 通常モード
           displayCards.length === 0 ? (
@@ -1056,5 +1247,14 @@ export default function HomePage() {
         }
       `}</style>
     </div>
+  );
+}
+
+// 認証プロバイダーでラップしたメインコンポーネント（条件付き認証）
+export default function HomePage() {
+  return (
+    <AuthProvider>
+      <HyakuninIsshuApp />
+    </AuthProvider>
   );
 }

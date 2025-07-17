@@ -1,0 +1,58 @@
+/* Import design system */
+@import '../src/styles/design-tokens.css';
+@import '../src/styles/vertical-text.css';
+@import '../src/styles/card-styles.css';
+
+/* Import existing component styles */
+@import '../src/components/Auth/AuthForm.css';
+@import '../src/components/Auth/UserProfile.css';
+@import '../src/components/Auth/LoadingSpinner.css';
+@import '../src/components/WordCard.css';
+@import '../src/components/CardForm.css';
+@import '../src/components/Pagination.css';
+@import '../src/components/SearchFilter.css';
+
+/* Global reset and base styles */
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: var(--font-primary);
+  background-color: var(--color-primary-bg);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+/* 縦書きテキスト用の基本設定 */
+.vertical-text {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  direction: rtl;
+}

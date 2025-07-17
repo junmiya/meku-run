@@ -1,4 +1,16 @@
 import { HyakuninIsshuCard } from '../types/WordCard';
+import { User } from 'firebase/auth';
+import { 
+  collection, 
+  doc, 
+  getDoc, 
+  setDoc, 
+  updateDoc, 
+  onSnapshot,
+  serverTimestamp,
+  Timestamp 
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 /**
  * 競技トレーニングセッションの結果
@@ -64,6 +76,8 @@ export class TrainingGameManager {
   private sessionHistory: TrainingSession[] = [];
   private timer: NodeJS.Timeout | null = null;
   private startTime: number = 0;
+  private user: User | null = null;
+  private unsubscribeListener: (() => void) | null = null;
   
   private constructor() {
     this.currentState = {
@@ -92,6 +106,28 @@ export class TrainingGameManager {
       TrainingGameManager.instance = new TrainingGameManager();
     }
     return TrainingGameManager.instance;
+  }
+  
+  /**
+   * ユーザーを設定
+   */
+  public setUser(user: User | null): void {
+    if (this.user?.uid !== user?.uid) {
+      this.cleanup();
+      this.user = user;
+      if (user) {
+        this.loadFromFirestore();
+      } else {
+        this.loadFromStorage();
+      }
+    }
+  }
+  
+  /**
+   * 現在のユーザーを取得
+   */
+  public getCurrentUser(): User | null {
+    return this.user;
   }
   
   /**
@@ -163,8 +199,12 @@ export class TrainingGameManager {
     this.currentState.isActive = false;
     this.currentState.currentPhase = 'finished';
     
-    // ローカルストレージに保存
-    this.saveToStorage();
+    // データを保存
+    if (this.user) {
+      this.saveToFirestore();
+    } else {
+      this.saveToStorage();
+    }
     
     const completedSession = this.currentSession;
     this.currentSession = null;
@@ -293,7 +333,11 @@ export class TrainingGameManager {
    */
   public clearHistory(): void {
     this.sessionHistory = [];
-    this.saveToStorage();
+    if (this.user) {
+      this.saveToFirestore();
+    } else {
+      this.saveToStorage();
+    }
   }
   
   // プライベートメソッド
@@ -388,6 +432,69 @@ export class TrainingGameManager {
       localStorage.setItem(TrainingGameManager.STORAGE_KEY, JSON.stringify(data));
     } catch (error) {
       console.warn('トレーニングセッション履歴の保存に失敗しました:', error);
+    }
+  }
+  
+  /**
+   * Firestoreからデータを読み込み
+   */
+  private async loadFromFirestore(): Promise<void> {
+    if (!this.user) return;
+    
+    try {
+      const userDocRef = doc(db, 'users', this.user.uid);
+      const trainingDocRef = doc(userDocRef, 'training', 'sessions');
+      
+      // リアルタイムリスナーを設定
+      this.unsubscribeListener = onSnapshot(trainingDocRef, (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data();
+          
+          // セッション履歴を復元
+          if (data.sessions) {
+            this.sessionHistory = data.sessions.map((session: any) => ({
+              ...session,
+              startTime: session.startTime?.toDate ? session.startTime.toDate() : new Date(session.startTime),
+              endTime: session.endTime?.toDate ? session.endTime.toDate() : (session.endTime ? new Date(session.endTime) : undefined)
+            }));
+          }
+        }
+      });
+    } catch (error) {
+      console.warn('Firestoreからのトレーニングセッションデータ読み込みに失敗しました:', error);
+      // フォールバックとしてローカルストレージを使用
+      this.loadFromStorage();
+    }
+  }
+  
+  /**
+   * Firestoreにデータを保存
+   */
+  private async saveToFirestore(): Promise<void> {
+    if (!this.user) return;
+    
+    try {
+      const userDocRef = doc(db, 'users', this.user.uid);
+      const trainingDocRef = doc(userDocRef, 'training', 'sessions');
+      
+      const data = {
+        sessions: this.sessionHistory,
+        lastUpdated: serverTimestamp()
+      };
+      
+      await setDoc(trainingDocRef, data, { merge: true });
+    } catch (error) {
+      console.warn('Firestoreへのトレーニングセッションデータ保存に失敗しました:', error);
+    }
+  }
+  
+  /**
+   * リスナーのクリーンアップ
+   */
+  private cleanup(): void {
+    if (this.unsubscribeListener) {
+      this.unsubscribeListener();
+      this.unsubscribeListener = null;
     }
   }
 }

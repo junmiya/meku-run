@@ -20,14 +20,17 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 // エミュレーター接続設定（開発環境でのみ）
-if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-  // エミュレーター接続の重複防止
-  if (!(db as any)._delegate._databaseId.projectId.includes('demo-project')) {
-    try {
-      connectFirestoreEmulator(db, 'localhost', 8080);
-    } catch (error) {
-      console.log('Firestore emulator already connected');
-    }
+// クライアントサイドかつ開発環境でのみ実行
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  // プロジェクトIDを設定から取得
+  const projectId = firebaseConfig.projectId;
+  
+  // エミュレーター接続の重複防止（demo-projectの場合のみエミュレーター使用を試行）
+  if (projectId === 'demo-project') {
+    // Firestoreエミュレーターは使用しない（本番Firebaseを使用）
+    console.log('Development mode: Using production Firebase (no emulator)');
+  } else {
+    console.log(`Development mode: Connected to project ${projectId}`);
   }
 }
 

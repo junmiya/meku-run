@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>百人一首カードテスト</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Serif JP', 'Yu Mincho', serif;
+            background: #faf9f7;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(220, 38, 38, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            color: #2d3436;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            color: #636e72;
+            font-size: 1.1rem;
+        }
+
+        .status {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .status h2 {
+            color: #2d3436;
+            margin-bottom: 1rem;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem;
+            background: rgba(5, 150, 105, 0.1);
+            border-left: 4px solid #059669;
+            border-radius: 4px;
+        }
+
+        .card-demo {
+            display: flex;
+            justify-content: center;
+            margin: 3rem 0;
+        }
+
+        .card {
+            perspective: 1000px;
+            width: 300px;
+            height: 420px;
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .card-number {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 0.9rem;
+            color: #a0aec0;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .vertical-text {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            direction: rtl;
+            height: 70%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .waka-text {
+            font-size: 1.3rem;
+            line-height: 2.2;
+            letter-spacing: 0.05em;
+            color: #2d3436;
+            margin: 0 0.8rem;
+            font-weight: 500;
+        }
+
+        .shimo-no-ku {
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .back-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .poem-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            height: 60%;
+        }
+
+        .author {
+            font-size: 0.9rem;
+            color: #636e72;
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            direction: rtl;
+            font-weight: 300;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 1rem;
+        }
+
+        .meaning {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            color: #636e72;
+            background: rgba(248, 250, 252, 0.8);
+            padding: 0.8rem;
+            border-radius: 6px;
+            border-left: 3px solid #f59e0b;
+            writing-mode: horizontal-tb;
+            text-orientation: mixed;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: transform 0.2s;
+            margin: 0 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .instructions h2 {
+            color: #2d3436;
+            margin-bottom: 1rem;
+        }
+
+        .instructions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .instructions li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .instructions li:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .card {
+                width: calc(100vw - 2rem);
+                max-width: 280px;
+                height: 400px;
+            }
+            
+            .waka-text {
+                font-size: 1.1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🎴 百人一首トレーニングアプリ</h1>
+            <p>美しい縦書きカード表示システムのデモ</p>
+        </header>
+
+        <section class="status">
+            <h2>✅ 実装完了機能</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <span>✅</span>
+                    <span>縦書き表示システム</span>
+                </div>
+                <div class="status-item">
+                    <span>✅</span>
+                    <span>カードフリップアニメーション</span>
+                </div>
+                <div class="status-item">
+                    <span>✅</span>
+                    <span>和モダンデザインシステム</span>
+                </div>
+                <div class="status-item">
+                    <span>✅</span>
+                    <span>レスポンシブ対応</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="controls">
+            <button class="btn" onclick="flipCard()">カードを裏返す</button>
+            <button class="btn" onclick="nextCard()">次のカード</button>
+        </div>
+
+        <div class="card-demo">
+            <div class="card">
+                <div class="card-inner" id="cardInner" onclick="flipCard()">
+                    <!-- カード表面（上の句） -->
+                    <div class="card-face">
+                        <div class="card-number" id="cardNumber">1</div>
+                        <div class="vertical-text">
+                            <div class="waka-text" id="kamiNoKu">
+                                秋の田の かりほの庵の 苫をあらみ
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- カード裏面（下の句） -->
+                    <div class="card-face card-back">
+                        <div class="back-content">
+                            <div class="poem-section">
+                                <div class="author" id="author">天智天皇</div>
+                                <div class="vertical-text">
+                                    <div class="waka-text shimo-no-ku" id="shimoNoKu">
+                                        わが衣手は 露にぬれつつ
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="meaning" id="meaning">
+                                秋の田の仮小屋の屋根の苫が粗いので、私の着物の袖は露に濡れてばかりいる
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="instructions">
+            <h2>📋 操作方法</h2>
+            <ul>
+                <li>🖱️ <strong>カードをクリック</strong> → 表裏切り替え</li>
+                <li>📱 <strong>スマートフォン対応</strong> → タップで操作可能</li>
+                <li>🎴 <strong>美しい縦書き表示</strong> → 本物の百人一首のような表示</li>
+                <li>🎨 <strong>和モダンデザイン</strong> → 日本の伝統色を使用</li>
+            </ul>
+        </section>
+    </div>
+
+    <script>
+        // 百人一首データ（最初の3首）
+        const cards = [
+            {
+                id: 1,
+                kamiNoKu: "秋の田の かりほの庵の 苫をあらみ",
+                shimoNoKu: "わが衣手は 露にぬれつつ", 
+                author: "天智天皇",
+                meaning: "秋の田の仮小屋の屋根の苫が粗いので、私の着物の袖は露に濡れてばかりいる"
+            },
+            {
+                id: 2,
+                kamiNoKu: "春すぎて 夏来にけらし 白妙の",
+                shimoNoKu: "衣ほすてふ 天の香具山",
+                author: "持統天皇", 
+                meaning: "春が過ぎて夏がやってきたらしい。白い衣を干すという天の香具山に"
+            },
+            {
+                id: 3,
+                kamiNoKu: "あしびきの 山鳥の尾の しだり尾の",
+                shimoNoKu: "ながながし夜を ひとりかも寝む",
+                author: "柿本人麻呂",
+                meaning: "山鳥の垂れ下がった尾のように長い長い夜を、ひとり寂しく寝ることであろうか"
+            }
+        ];
+
+        let currentCardIndex = 0;
+        let isFlipped = false;
+
+        function flipCard() {
+            const cardInner = document.getElementById('cardInner');
+            isFlipped = !isFlipped;
+            cardInner.classList.toggle('flipped', isFlipped);
+        }
+
+        function nextCard() {
+            currentCardIndex = (currentCardIndex + 1) % cards.length;
+            updateCard();
+            
+            // カードをリセット（表面に戻す）
+            const cardInner = document.getElementById('cardInner');
+            isFlipped = false;
+            cardInner.classList.remove('flipped');
+        }
+
+        function updateCard() {
+            const card = cards[currentCardIndex];
+            document.getElementById('cardNumber').textContent = card.id;
+            document.getElementById('kamiNoKu').textContent = card.kamiNoKu;
+            document.getElementById('shimoNoKu').textContent = card.shimoNoKu;
+            document.getElementById('author').textContent = card.author;
+            document.getElementById('meaning').textContent = card.meaning;
+        }
+
+        // 初期化
+        updateCard();
+    </script>
+</body>
+</html>

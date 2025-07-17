@@ -1,5 +1,17 @@
 import { HyakuninIsshuCard } from '../types/WordCard';
 import { TrainingResult, TrainingSession } from './TrainingGameManager';
+import { User } from 'firebase/auth';
+import { 
+  collection, 
+  doc, 
+  getDoc, 
+  setDoc, 
+  updateDoc, 
+  onSnapshot,
+  serverTimestamp,
+  Timestamp 
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 /**
  * カードの成績情報
@@ -78,6 +90,8 @@ export class PerformanceManager {
   
   private cardPerformances: Map<number, CardPerformance> = new Map();
   private sessionHistory: TrainingSession[] = [];
+  private user: User | null = null;
+  private unsubscribeListener: (() => void) | null = null;
   
   private constructor() {
     // クライアントサイドでのみローカルストレージを読み込み
@@ -94,6 +108,28 @@ export class PerformanceManager {
       PerformanceManager.instance = new PerformanceManager();
     }
     return PerformanceManager.instance;
+  }
+  
+  /**
+   * ユーザーを設定
+   */
+  public setUser(user: User | null): void {
+    if (this.user?.uid !== user?.uid) {
+      this.cleanup();
+      this.user = user;
+      if (user) {
+        this.loadFromFirestore();
+      } else {
+        this.loadFromStorage();
+      }
+    }
+  }
+  
+  /**
+   * 現在のユーザーを取得
+   */
+  public getCurrentUser(): User | null {
+    return this.user;
   }
   
   /**
@@ -143,7 +179,11 @@ export class PerformanceManager {
     performance.lastPracticed = new Date();
     
     this.cardPerformances.set(cardId, performance);
-    this.saveToStorage();
+    if (this.user) {
+      this.saveToFirestore();
+    } else {
+      this.saveToStorage();
+    }
   }
   
   /**
@@ -157,7 +197,11 @@ export class PerformanceManager {
       this.recordTrainingResult(result);
     });
     
-    this.saveToStorage();
+    if (this.user) {
+      this.saveToFirestore();
+    } else {
+      this.saveToStorage();
+    }
   }
   
   /**
@@ -295,7 +339,11 @@ export class PerformanceManager {
   public clearData(): void {
     this.cardPerformances.clear();
     this.sessionHistory = [];
-    this.saveToStorage();
+    if (this.user) {
+      this.saveToFirestore();
+    } else {
+      this.saveToStorage();
+    }
   }
   
   // プライベートメソッド
@@ -487,6 +535,75 @@ export class PerformanceManager {
       localStorage.setItem(PerformanceManager.STORAGE_KEY, JSON.stringify(data));
     } catch (error) {
       console.warn('パフォーマンスデータの保存に失敗しました:', error);
+    }
+  }
+  
+  /**
+   * Firestoreからデータを読み込み
+   */
+  private async loadFromFirestore(): Promise<void> {
+    if (!this.user) return;
+    
+    try {
+      const userDocRef = doc(db, 'users', this.user.uid);
+      const progressDocRef = doc(userDocRef, 'progress', 'performance');
+      
+      // リアルタイムリスナーを設定
+      this.unsubscribeListener = onSnapshot(progressDocRef, (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data();
+          
+          // カード成績を復元
+          if (data.cardPerformances) {
+            this.cardPerformances = new Map(data.cardPerformances);
+          }
+          
+          // セッション履歴を復元
+          if (data.sessionHistory) {
+            this.sessionHistory = data.sessionHistory.map((session: any) => ({
+              ...session,
+              startTime: session.startTime?.toDate ? session.startTime.toDate() : new Date(session.startTime),
+              endTime: session.endTime?.toDate ? session.endTime.toDate() : (session.endTime ? new Date(session.endTime) : undefined)
+            }));
+          }
+        }
+      });
+    } catch (error) {
+      console.warn('Firestoreからのパフォーマンスデータ読み込みに失敗しました:', error);
+      // フォールバックとしてローカルストレージを使用
+      this.loadFromStorage();
+    }
+  }
+  
+  /**
+   * Firestoreにデータを保存
+   */
+  private async saveToFirestore(): Promise<void> {
+    if (!this.user) return;
+    
+    try {
+      const userDocRef = doc(db, 'users', this.user.uid);
+      const progressDocRef = doc(userDocRef, 'progress', 'performance');
+      
+      const data = {
+        cardPerformances: Array.from(this.cardPerformances.entries()),
+        sessionHistory: this.sessionHistory,
+        lastUpdated: serverTimestamp()
+      };
+      
+      await setDoc(progressDocRef, data, { merge: true });
+    } catch (error) {
+      console.warn('Firestoreへのパフォーマンスデータ保存に失敗しました:', error);
+    }
+  }
+  
+  /**
+   * リスナーのクリーンアップ
+   */
+  private cleanup(): void {
+    if (this.unsubscribeListener) {
+      this.unsubscribeListener();
+      this.unsubscribeListener = null;
     }
   }
 }
