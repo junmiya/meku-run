@@ -23,8 +23,17 @@ export default function HomePage() {
   // 表示枚数変更処理
   const handleCardsPerPageChange = (newCardsPerPage: number) => {
     setCardsPerPage(newCardsPerPage);
-    const availableCards = filterCardsByKimarijiLength(cards.filter(card => !memorizationManager.isMemorized(card.id)));
-    setDisplayCards(availableCards.slice(0, newCardsPerPage));
+    
+    let filteredCards: HyakuninIsshuCard[];
+    
+    if (kimarijiLengthFilter === 'all') {
+      filteredCards = hyakuninIsshuData.filter(card => !memorizationManager.isMemorized(card.id));
+    } else {
+      const kimarijiCardIds = getCardsByKimarijiLength(kimarijiLengthFilter);
+      filteredCards = memorizationManager.getUnmemorizedCardsByKimarijiLength(hyakuninIsshuData, kimarijiCardIds);
+    }
+    
+    setDisplayCards(filteredCards.slice(0, newCardsPerPage));
   };
 
   // 決まり字数でフィルタリング
@@ -38,18 +47,25 @@ export default function HomePage() {
   // 決まり字数フィルター変更処理
   const handleKimarijiLengthChange = (length: 'all' | 1 | 2 | 3 | 4 | 5 | 6) => {
     setKimarijiLengthFilter(length);
-    const availableCards = cards.filter(card => !memorizationManager.isMemorized(card.id));
     
     // デバッグ: フィルタリング前の状態確認
     console.log(`フィルター: ${length}字決まりを選択`);
-    console.log('利用可能なカード数:', availableCards.length);
-    if (length !== 'all') {
-      console.log('対象となる札ID:', getCardsByKimarijiLength(length));
-    }
+    console.log('全カード数:', cards.length);
     
-    const filteredCards = length === 'all' ? availableCards : availableCards.filter(card => 
-      getCardsByKimarijiLength(length).includes(card.id)
-    );
+    let filteredCards: HyakuninIsshuCard[];
+    
+    if (length === 'all') {
+      // 全ての覚えていないカードを取得
+      filteredCards = cards.filter(card => !memorizationManager.isMemorized(card.id));
+    } else {
+      // 指定された決まり字数のカードIDを取得
+      const kimarijiCardIds = getCardsByKimarijiLength(length);
+      console.log(`${length}字決まりの札ID:`, kimarijiCardIds);
+      
+      // 決まり字フィルターと覚えていないカードのフィルターを組み合わせ
+      // 全てのカード（hyakuninIsshuData）から検索するように修正
+      filteredCards = memorizationManager.getUnmemorizedCardsByKimarijiLength(hyakuninIsshuData, kimarijiCardIds);
+    }
     
     console.log('フィルタリング後のカード数:', filteredCards.length);
     setDisplayCards(filteredCards.slice(0, cardsPerPage));
@@ -67,10 +83,11 @@ export default function HomePage() {
     if (typeof window !== 'undefined') {
       try {
         cardManager.setAllCards(hyakuninIsshuData);
-        const managedCards = cardManager.getRecommendedSet('desktop', 'beginner');
+        // 初期化時は全てのカードを使用（beginnerフィルターを適用しない）
+        const allCards = hyakuninIsshuData;
         
-        setCards(managedCards);
-        setDisplayCards(managedCards.slice(0, 10));
+        setCards(allCards);
+        setDisplayCards(allCards.slice(0, 10));
         setMemorizedCount(memorizationManager.getMemorizedCount());
         setIsInitialized(true);
         
@@ -83,6 +100,10 @@ export default function HomePage() {
         console.log('4字決まり:', getCardsByKimarijiLength(4));
         console.log('5字決まり:', getCardsByKimarijiLength(5));
         console.log('6字決まり:', getCardsByKimarijiLength(6));
+        
+        // 覚えた状態のデバッグ
+        console.log('覚えたカード数:', memorizationManager.getMemorizedCount());
+        console.log('覚えたカードID:', memorizationManager.getMemorizedCardIds());
       } catch (error) {
         console.error('初期化エラー:', error);
         setIsInitialized(true);
@@ -114,13 +135,23 @@ export default function HomePage() {
       setDisplayCards(newDisplayCards);
       
       // 新しい札を追加（残りの札がある場合）
-      const remainingCards = cards.filter(card => 
+      const remainingCards = hyakuninIsshuData.filter(card => 
         !newDisplayCards.some(displayCard => displayCard.id === card.id) && 
         !memorizationManager.isMemorized(card.id)
       );
       
       if (remainingCards.length > 0 && newDisplayCards.length < cardsPerPage) {
-        const filteredRemainingCards = filterCardsByKimarijiLength(remainingCards);
+        let filteredRemainingCards: HyakuninIsshuCard[];
+        
+        if (kimarijiLengthFilter === 'all') {
+          filteredRemainingCards = remainingCards;
+        } else {
+          const kimarijiCardIds = getCardsByKimarijiLength(kimarijiLengthFilter);
+          filteredRemainingCards = remainingCards.filter(card => 
+            kimarijiCardIds.includes(card.id)
+          );
+        }
+        
         if (filteredRemainingCards.length > 0) {
           const nextCard = filteredRemainingCards[0];
           if (nextCard) {
@@ -133,10 +164,18 @@ export default function HomePage() {
 
   // シャッフル処理
   const handleShuffle = () => {
-    const shuffledCards = [...cards].sort(() => Math.random() - 0.5);
+    const shuffledCards = [...hyakuninIsshuData].sort(() => Math.random() - 0.5);
     setCards(shuffledCards);
-    const availableCards = shuffledCards.filter(card => !memorizationManager.isMemorized(card.id));
-    const filteredCards = filterCardsByKimarijiLength(availableCards);
+    
+    let filteredCards: HyakuninIsshuCard[];
+    
+    if (kimarijiLengthFilter === 'all') {
+      filteredCards = shuffledCards.filter(card => !memorizationManager.isMemorized(card.id));
+    } else {
+      const kimarijiCardIds = getCardsByKimarijiLength(kimarijiLengthFilter);
+      filteredCards = memorizationManager.getUnmemorizedCardsByKimarijiLength(shuffledCards, kimarijiCardIds);
+    }
+    
     setDisplayCards(filteredCards.slice(0, cardsPerPage));
     setFlippedCards(new Set());
   };
@@ -151,7 +190,16 @@ export default function HomePage() {
     });
     
     setMemorizedCount(0);
-    const filteredCards = filterCardsByKimarijiLength(cards);
+    
+    let filteredCards: HyakuninIsshuCard[];
+    
+    if (kimarijiLengthFilter === 'all') {
+      filteredCards = hyakuninIsshuData;
+    } else {
+      const kimarijiCardIds = getCardsByKimarijiLength(kimarijiLengthFilter);
+      filteredCards = hyakuninIsshuData.filter(card => kimarijiCardIds.includes(card.id));
+    }
+    
     setDisplayCards(filteredCards.slice(0, cardsPerPage));
     setFlippedCards(new Set());
   };

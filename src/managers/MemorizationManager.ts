@@ -105,6 +105,15 @@ export class MemorizationManager {
   }
 
   /**
+   * 決まり字フィルター適用時に覚えていないカードを取得
+   */
+  getUnmemorizedCardsByKimarijiLength(allCards: HyakuninIsshuCard[], kimarijiCardIds: number[]): HyakuninIsshuCard[] {
+    return allCards.filter(card => 
+      kimarijiCardIds.includes(card.id) && !this.isMemorized(card.id)
+    );
+  }
+
+  /**
    * カード一覧から覚えたカードのみを抽出（復習モード用）
    */
   filterMemorizedCards(cards: HyakuninIsshuCard[]): HyakuninIsshuCard[] {
