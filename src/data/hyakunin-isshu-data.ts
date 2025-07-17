@@ -77,9 +77,9 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
     },
     kimariji: {
       position: 0,
-      length: 2,
-      pattern: "たご",
-      category: 2,
+      length: 3,
+      pattern: "たごの",
+      category: 3,
       conflictCards: [5],
       difficulty: "medium"
     },
@@ -1459,7 +1459,7 @@ export const hyakuninIsshuData: HyakuninIsshuCard[] = [
       position: 0,
       length: 2,
       pattern: "たか",
-      category: 3,
+      category: 2,
       conflictCards: [],
       difficulty: "medium"
     },
