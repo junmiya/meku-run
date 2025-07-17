@@ -36,7 +36,7 @@ export default function HomePage() {
   };
 
   // 決まり字数フィルター変更処理
-  const handleKimarijiLengthChange = (length: 'all' | 1 | 2 | 3 | 4 | 5) => {
+  const handleKimarijiLengthChange = (length: 'all' | 1 | 2 | 3 | 4 | 5 | 6) => {
     setKimarijiLengthFilter(length);
     const availableCards = cards.filter(card => !memorizationManager.isMemorized(card.id));
     
@@ -56,7 +56,7 @@ export default function HomePage() {
   };
   const [showKimariji, setShowKimariji] = useState(false);
   const [hiraganaMode, setHiraganaMode] = useState(false);
-  const [kimarijiLengthFilter, setKimarijiLengthFilter] = useState<'all' | 1 | 2 | 3 | 4 | 5>('all');
+  const [kimarijiLengthFilter, setKimarijiLengthFilter] = useState<'all' | 1 | 2 | 3 | 4 | 5 | 6>('all');
   const [isTrainingMode, setIsTrainingMode] = useState(false);
   const [currentTrainingType, setCurrentTrainingType] = useState<'oneChar' | 'twoChar' | 'threeChar' | 'mixed'>('oneChar');
   
@@ -82,6 +82,7 @@ export default function HomePage() {
         console.log('3字決まり:', getCardsByKimarijiLength(3));
         console.log('4字決まり:', getCardsByKimarijiLength(4));
         console.log('5字決まり:', getCardsByKimarijiLength(5));
+        console.log('6字決まり:', getCardsByKimarijiLength(6));
       } catch (error) {
         console.error('初期化エラー:', error);
         setIsInitialized(true);
@@ -400,7 +401,7 @@ export default function HomePage() {
                   <span style={{ fontSize: '14px', color: '#374151' }}>決まり字数:</span>
                   <select
                     value={kimarijiLengthFilter}
-                    onChange={(e) => handleKimarijiLengthChange(e.target.value as 'all' | 1 | 2 | 3 | 4 | 5)}
+                    onChange={(e) => handleKimarijiLengthChange(e.target.value as 'all' | 1 | 2 | 3 | 4 | 5 | 6)}
                     style={{
                       backgroundColor: 'white',
                       color: '#374151',
@@ -416,7 +417,8 @@ export default function HomePage() {
                     <option value={2}>2字</option>
                     <option value={3}>3字</option>
                     <option value={4}>4字</option>
-                    <option value={5}>5字以上</option>
+                    <option value={5}>5字</option>
+                    <option value={6}>6字</option>
                   </select>
                 </div>
               </div>

@@ -117,12 +117,6 @@ export const getKimarijiInfo = (cardId: number): KimarijiInfo | undefined => {
  * 決まり字の長さでカードをフィルタリング
  */
 export const getCardsByKimarijiLength = (length: number): number[] => {
-  if (length === 5) {
-    // 5字以上の場合は、category 5 と 6以上をすべて含める
-    const cards5 = kimarijiByLength[5] || [];
-    const cards6 = kimarijiByLength[6] || [];
-    return [...cards5, ...cards6];
-  }
   return kimarijiByLength[length] || [];
 };
 
