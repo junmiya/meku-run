@@ -753,7 +753,8 @@ export default function HomePage() {
                       flexDirection: 'column', 
                       justifyContent: 'space-between',
                       minHeight: '180px',
-                      padding: '12px'
+                      padding: '12px',
+                      position: 'relative'
                     }}>
                       <div style={{ 
                         flex: 1,
@@ -774,7 +775,7 @@ export default function HomePage() {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontFamily: '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif',
+                            fontFamily: '"Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif',
                             fontWeight: '700',
                             color: '#1a1a1a',
                             letterSpacing: '0.03em',
@@ -800,7 +801,7 @@ export default function HomePage() {
                             color: '#b45309',
                             padding: '3px 4px', 
                             borderRadius: '2px',
-                            fontFamily: '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif',
+                            fontFamily: '"Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif',
                             fontWeight: '700',
                             border: '1px solid #f3d19e',
                             display: 'flex',
@@ -816,14 +817,18 @@ export default function HomePage() {
                         fontSize: '0.7rem', 
                         color: '#444444', 
                         textAlign: 'center',
-                        marginTop: '-50px',
-                        fontFamily: '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif',
+                        position: 'absolute',
+                        bottom: '8px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        fontFamily: '"Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif',
                         fontWeight: '500',
                         letterSpacing: '0.05em',
                         height: '30px',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        whiteSpace: 'nowrap'
                       }}>
                         {card.author}
                       </div>
@@ -836,7 +841,8 @@ export default function HomePage() {
                       flexDirection: 'column', 
                       justifyContent: 'space-between',
                       minHeight: '180px',
-                      padding: '12px'
+                      padding: '12px',
+                      position: 'relative'
                     }}>
                       <div style={{ 
                         flex: 1,
@@ -857,7 +863,7 @@ export default function HomePage() {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontFamily: '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif',
+                            fontFamily: '"Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif',
                             fontWeight: '700',
                             color: '#1a1a1a',
                             letterSpacing: '0.03em',
@@ -883,7 +889,7 @@ export default function HomePage() {
                             color: '#b45309',
                             padding: '3px 4px', 
                             borderRadius: '2px',
-                            fontFamily: '"Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "Noto Serif JP", serif',
+                            fontFamily: '"Noto Serif JP", "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", serif',
                             fontWeight: '700',
                             border: '1px solid #f3d19e',
                             display: 'flex',

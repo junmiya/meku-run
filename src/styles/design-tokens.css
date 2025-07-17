@@ -1,0 +1,215 @@
+/**
+ * 百人一首トレーニングアプリ - デザインシステム
+ * 和モダンデザインをベースとした縦書き対応スタイル
+ */
+
+:root {
+  /* ========================================
+     基調色 - 日本の伝統色ベース
+  ======================================== */
+  
+  /* メインカラー */
+  --color-primary-bg: #faf9f7;      /* 生成り色 - メイン背景 */
+  --color-card-bg: #ffffff;         /* 純白 - カード背景 */
+  --color-surface: #f8fafc;         /* 薄い雲色 - サーフェス */
+  --color-overlay: rgba(45, 52, 54, 0.95); /* オーバーレイ */
+  
+  /* テキストカラー */
+  --color-text-primary: #2d3436;    /* 墨色 - メインテキスト */
+  --color-text-secondary: #636e72;  /* 鈍色 - セカンダリテキスト */
+  --color-text-muted: #a0aec0;      /* 薄墨色 - ミュートテキスト */
+  --color-text-inverse: #ffffff;    /* 白 - 逆色テキスト */
+  
+  /* アクセントカラー */
+  --color-accent-red: #dc2626;      /* 朱色 - 決まり字用 */
+  --color-accent-gold: #f59e0b;     /* 金色 - お気に入り用 */
+  --color-accent-green: #059669;    /* 緑青色 - 覚えたボタン用 */
+  --color-accent-blue: #3b82f6;     /* 藍色 - 情報・リンク用 */
+  
+  /* 状態表示色 */
+  --color-success: #10b981;         /* 成功 */
+  --color-warning: #f59e0b;         /* 警告 */
+  --color-error: #ef4444;           /* エラー */
+  --color-info: #3b82f6;            /* 情報 */
+  
+  /* グラデーション */
+  --gradient-card: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  --gradient-accent: linear-gradient(90deg, var(--color-accent-red) 0%, var(--color-accent-gold) 50%, var(--color-accent-red) 100%);
+  --gradient-background: radial-gradient(circle at 20% 50%, rgba(220, 38, 38, 0.05) 0%, transparent 50%), 
+                        radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
+  
+  /* ========================================
+     シャドウシステム
+  ======================================== */
+  
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-card: var(--shadow-lg);
+  --shadow-card-hover: var(--shadow-xl);
+  
+  /* ========================================
+     タイポグラフィシステム
+  ======================================== */
+  
+  /* フォントファミリー */
+  --font-primary: 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', serif;
+  --font-secondary: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+  
+  /* フォントサイズ */
+  --font-size-xs: 0.75rem;     /* 12px */
+  --font-size-sm: 0.875rem;    /* 14px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;    /* 18px */
+  --font-size-xl: 1.25rem;     /* 20px */
+  --font-size-2xl: 1.5rem;     /* 24px */
+  --font-size-3xl: 1.875rem;   /* 30px */
+  --font-size-4xl: 2.25rem;    /* 36px */
+  
+  /* 行間 */
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+  --line-height-poetry: 2.2;   /* 和歌用の行間 */
+  
+  /* 文字間隔 */
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
+  --letter-spacing-poetry: 0.05em; /* 和歌用の文字間隔 */
+  
+  /* ========================================
+     スペーシングシステム
+  ======================================== */
+  
+  --space-0: 0;
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+  --space-24: 6rem;     /* 96px */
+  
+  /* ========================================
+     縦書き専用設定
+  ======================================== */
+  
+  /* 縦書きコンテナ */
+  --vertical-writing-mode: vertical-rl;
+  --vertical-text-orientation: upright;
+  --vertical-direction: rtl;
+  
+  /* 縦書きスペーシング */
+  --vertical-margin-block: var(--space-4);
+  --vertical-margin-inline: var(--space-6);
+  --vertical-padding-block: var(--space-3);
+  --vertical-padding-inline: var(--space-4);
+  
+  /* ========================================
+     ボーダー・ラジウス
+  ======================================== */
+  
+  --border-width: 1px;
+  --border-color: #e2e8f0;
+  --border-color-accent: var(--color-accent-red);
+  
+  --radius-sm: 0.125rem;  /* 2px */
+  --radius-md: 0.375rem;  /* 6px */
+  --radius-lg: 0.5rem;    /* 8px */
+  --radius-xl: 0.75rem;   /* 12px */
+  --radius-2xl: 1rem;     /* 16px */
+  --radius-card: var(--radius-xl);
+  
+  /* ========================================
+     アニメーション・トランジション
+  ======================================== */
+  
+  --transition-fast: 150ms ease-out;
+  --transition-normal: 300ms ease-out;
+  --transition-slow: 500ms ease-out;
+  --transition-card-flip: 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* イージング関数 */
+  --ease-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-in-out-quad: cubic-bezier(0.455, 0.03, 0.515, 0.955);
+  
+  /* ========================================
+     レスポンシブブレークポイント
+  ======================================== */
+  
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  
+  /* ========================================
+     Z-インデックス
+  ======================================== */
+  
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal-backdrop: 1040;
+  --z-index-modal: 1050;
+  --z-index-popover: 1060;
+  --z-index-tooltip: 1070;
+  --z-index-toast: 1080;
+}
+
+/* ========================================
+   ダークモード対応（将来実装用）
+======================================== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary-bg: #1a202c;
+    --color-card-bg: #2d3748;
+    --color-surface: #4a5568;
+    --color-text-primary: #f7fafc;
+    --color-text-secondary: #e2e8f0;
+    --color-text-muted: #a0aec0;
+  }
+}
+
+/* ========================================
+   フォント読み込み
+======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
+
+/* フォント読み込み完了の保証 */
+.font-loaded {
+  font-family: 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', 'YuMincho', serif;
+}
+
+/* ========================================
+   基本リセット
+======================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-primary-bg);
+  background-image: var(--gradient-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

@@ -1,0 +1,283 @@
+/**
+ * 縦書きテキスト専用スタイル
+ * 百人一首の美しい表示のための縦書きCSS
+ */
+
+/* ========================================
+   縦書き基本クラス
+======================================== */
+
+.vertical-text {
+  writing-mode: var(--vertical-writing-mode);
+  text-orientation: var(--vertical-text-orientation);
+  direction: var(--vertical-direction);
+  text-align: start;
+}
+
+.vertical-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* ========================================
+   和歌テキストスタイル
+======================================== */
+
+.waka-text {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 400;
+  line-height: var(--line-height-poetry);
+  letter-spacing: var(--letter-spacing-poetry);
+  color: var(--color-text-primary);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  margin: var(--vertical-margin-block) var(--vertical-margin-inline);
+}
+
+.waka-text.kami-no-ku {
+  font-size: var(--font-size-xl);
+  font-weight: 500;
+  margin-inline-end: var(--space-8);
+}
+
+.waka-text.shimo-no-ku {
+  font-size: var(--font-size-lg);
+  font-weight: 400;
+  margin-inline-start: var(--space-4);
+}
+
+/* ========================================
+   作者名スタイル
+======================================== */
+
+.author-name {
+  font-family: var(--font-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 300;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--color-text-secondary);
+  margin-block-start: var(--space-6);
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  direction: rtl;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ========================================
+   ふりがなスタイル
+======================================== */
+
+.furigana-container {
+  display: inline;
+}
+
+ruby {
+  ruby-align: center;
+  ruby-position: over;
+}
+
+rt {
+  font-size: 0.6em;
+  font-weight: 300;
+  color: var(--color-text-secondary);
+  line-height: 1;
+}
+
+/* 決まり字ハイライト */
+.kimariji-highlight {
+  color: var(--color-accent-red);
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(220, 38, 38, 0.3);
+  position: relative;
+}
+
+.kimariji-highlight::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -2px;
+  right: -2px;
+  bottom: 60%;
+  background: linear-gradient(transparent 60%, rgba(220, 38, 38, 0.1) 60%);
+  pointer-events: none;
+}
+
+.kimariji-furigana {
+  color: var(--color-accent-red);
+  font-weight: 500;
+}
+
+/* ========================================
+   縦書きでの段落・改行処理
+======================================== */
+
+.vertical-paragraph {
+  margin-block: var(--space-4);
+  text-indent: 1em;
+}
+
+.vertical-line-break {
+  display: block;
+  margin-block: var(--space-2);
+}
+
+/* 縦書きでの句読点調整 */
+.vertical-text .punctuation {
+  font-feature-settings: "vhal" 1;
+  text-combine-upright: all;
+}
+
+/* ========================================
+   番号表示（横書き）
+======================================== */
+
+.card-number {
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  font-family: var(--font-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.8);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+/* ========================================
+   現代語訳スタイル
+======================================== */
+
+.meaning-text {
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+  font-family: var(--font-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 300;
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-secondary);
+  background: rgba(248, 250, 252, 0.8);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-accent-gold);
+  margin-top: var(--space-4);
+}
+
+/* ========================================
+   レスポンシブ対応
+======================================== */
+
+/* スマートフォン縦向き */
+@media (max-width: 480px) {
+  .waka-text {
+    font-size: var(--font-size-base);
+    line-height: 2;
+    margin: var(--space-2) var(--space-4);
+  }
+  
+  .waka-text.kami-no-ku {
+    font-size: var(--font-size-lg);
+    margin-inline-end: var(--space-6);
+  }
+  
+  .waka-text.shimo-no-ku {
+    font-size: var(--font-size-base);
+    margin-inline-start: var(--space-3);
+  }
+  
+  .meaning-text {
+    font-size: var(--font-size-xs);
+    padding: var(--space-2) var(--space-3);
+  }
+}
+
+/* タブレット */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .waka-text {
+    font-size: var(--font-size-xl);
+  }
+  
+  .waka-text.kami-no-ku {
+    font-size: var(--font-size-2xl);
+  }
+}
+
+/* デスクトップ */
+@media (min-width: 1024px) {
+  .waka-text {
+    font-size: var(--font-size-xl);
+    letter-spacing: var(--letter-spacing-wider);
+  }
+  
+  .waka-text.kami-no-ku {
+    font-size: var(--font-size-2xl);
+    margin-inline-end: var(--space-10);
+  }
+}
+
+/* ========================================
+   印刷スタイル
+======================================== */
+
+@media print {
+  .vertical-text {
+    color: black;
+    background: white;
+  }
+  
+  .waka-text {
+    font-size: 14pt;
+    line-height: 2;
+  }
+  
+  .kimariji-highlight {
+    color: black;
+    font-weight: bold;
+    background: none;
+    text-decoration: underline;
+  }
+  
+  .meaning-text {
+    background: none;
+    border: 1px solid #ccc;
+  }
+}
+
+/* ========================================
+   アクセシビリティ対応
+======================================== */
+
+/* 動きを減らす設定を持つユーザー向け */
+@media (prefers-reduced-motion: reduce) {
+  .vertical-text {
+    transition: none;
+  }
+}
+
+/* ハイコントラスト対応 */
+@media (prefers-contrast: high) {
+  .waka-text {
+    color: black;
+    text-shadow: none;
+  }
+  
+  .kimariji-highlight {
+    color: #d00000;
+    background: yellow;
+  }
+  
+  .meaning-text {
+    background: white;
+    border: 2px solid black;
+  }
+}

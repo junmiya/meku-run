@@ -1,0 +1,403 @@
+/**
+ * 設定パネル専用スタイル
+ * 百人一首トレーニングアプリ設定UI
+ */
+
+/* ========================================
+   設定オーバーレイ
+======================================== */
+
+.settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-4);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ========================================
+   設定パネル
+======================================== */
+
+.settings-panel {
+  background: var(--color-primary-bg);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-2xl);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ========================================
+   設定ヘッダー
+======================================== */
+
+.settings-header {
+  background: linear-gradient(135deg, var(--color-text-primary) 0%, #4a5568 100%);
+  color: white;
+  padding: var(--space-5) var(--space-6);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.settings-header h2 {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: var(--radius-full);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.close-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ========================================
+   設定コンテンツ
+======================================== */
+
+.settings-content {
+  padding: var(--space-6);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.settings-section {
+  margin-bottom: var(--space-8);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.settings-section:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.settings-section h3 {
+  font-family: var(--font-primary);
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-4) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ========================================
+   設定項目
+======================================== */
+
+.setting-item {
+  margin-bottom: var(--space-4);
+}
+
+.setting-item:last-child {
+  margin-bottom: 0;
+}
+
+.setting-item label {
+  font-family: var(--font-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  display: block;
+  margin-bottom: var(--space-2);
+}
+
+.setting-item small {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  display: block;
+  margin-top: var(--space-1);
+}
+
+/* ========================================
+   フォーム要素
+======================================== */
+
+.setting-select {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: white;
+  font-family: var(--font-secondary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-fast);
+}
+
+.setting-select:focus {
+  outline: none;
+  border-color: var(--color-accent-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.setting-checkbox {
+  display: flex !important;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  margin-bottom: 0 !important;
+}
+
+.setting-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent-blue);
+  cursor: pointer;
+}
+
+.setting-checkbox input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.setting-checkbox span {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.login-required {
+  color: var(--color-accent-red) !important;
+  font-style: italic;
+}
+
+/* ========================================
+   ラジオグループ
+======================================== */
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.setting-radio {
+  display: flex !important;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  margin-bottom: 0 !important;
+}
+
+.setting-radio input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-accent-blue);
+  cursor: pointer;
+}
+
+.setting-radio span {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+/* ========================================
+   進捗表示
+======================================== */
+
+.progress-stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.stat-value {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: var(--space-4);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent-green) 0%, var(--color-accent-blue) 100%);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease-out;
+}
+
+/* ========================================
+   ボタン
+======================================== */
+
+.danger-button {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  width: 100%;
+}
+
+.danger-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.danger-button:active {
+  transform: scale(0.98);
+}
+
+.danger-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ========================================
+   レスポンシブ対応
+======================================== */
+
+/* スマートフォン */
+@media (max-width: 480px) {
+  .settings-overlay {
+    padding: var(--space-2);
+  }
+  
+  .settings-panel {
+    max-height: 95vh;
+  }
+  
+  .settings-header {
+    padding: var(--space-4) var(--space-5);
+  }
+  
+  .settings-header h2 {
+    font-size: var(--font-size-lg);
+  }
+  
+  .settings-content {
+    padding: var(--space-4);
+  }
+  
+  .settings-section {
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-4);
+  }
+  
+  .radio-group {
+    gap: var(--space-3);
+  }
+}
+
+/* タブレット */
+@media (min-width: 768px) {
+  .settings-panel {
+    max-width: 600px;
+  }
+  
+  .radio-group {
+    flex-direction: row;
+    gap: var(--space-6);
+  }
+}
+
+/* ========================================
+   アクセシビリティ
+======================================== */
+
+.settings-panel:focus {
+  outline: 2px solid var(--color-accent-blue);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-overlay,
+  .settings-panel,
+  .progress-fill {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .settings-panel {
+    border: 2px solid black;
+  }
+  
+  .setting-select,
+  .setting-checkbox input,
+  .setting-radio input {
+    border: 2px solid black;
+  }
+  
+  .progress-bar {
+    border: 1px solid black;
+  }
+  
+  .progress-fill {
+    background: green;
+  }
+}
