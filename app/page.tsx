@@ -4,8 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { hyakuninIsshuData } from '../src/data/hyakunin-isshu-data';
 import { ResponsiveCardManager } from '../src/managers/ResponsiveCardManager';
 import { memorizationManager } from '../src/managers/MemorizationManager';
+import { TrainingGameManager } from '../src/managers/TrainingGameManager';
+import { PerformanceManager } from '../src/managers/PerformanceManager';
 import { HyakuninIsshuCard } from '../src/types/WordCard';
 import { getCardsByKimarijiLength, getKimarijiInfo, debugKimarijiClassification } from '../src/data/kimariji-data';
+import { Timer, CompetitionModeSelect } from '../src/components/Timer';
 
 
 
@@ -76,7 +79,19 @@ export default function HomePage() {
   const [isTrainingMode, setIsTrainingMode] = useState(false);
   const [currentTrainingType, setCurrentTrainingType] = useState<'oneChar' | 'twoChar' | 'threeChar' | 'mixed'>('oneChar');
   
+  // 競技モード関連の状態
+  const [isCompetitionMode, setIsCompetitionMode] = useState(false);
+  const [competitionMode, setCompetitionMode] = useState<'memorization' | 'reaction' | 'competition'>('memorization');
+  const [competitionLevel, setCompetitionLevel] = useState<1 | 2 | 3 | 4 | 5 | 6 | 'mixed'>('mixed');
+  const [competitionSettings, setCompetitionSettings] = useState({
+    timeLimit: 60,
+    memorizationTime: 15,
+    judgeMode: 'normal' as 'strict' | 'normal' | 'lenient'
+  });
+  
   const cardManager = ResponsiveCardManager.getInstance();
+  const trainingGameManager = TrainingGameManager.getInstance();
+  const performanceManager = PerformanceManager.getInstance();
 
   // 初期化
   useEffect(() => {
@@ -204,6 +219,59 @@ export default function HomePage() {
     setFlippedCards(new Set());
   };
 
+  // 競技モード開始
+  const startCompetitionMode = () => {
+    setIsCompetitionMode(true);
+    const session = trainingGameManager.startSession(
+      competitionMode,
+      competitionLevel,
+      competitionSettings
+    );
+    
+    // 競技モード用のカードを設定
+    const competitionCards = getCompetitionCards();
+    setDisplayCards(competitionCards);
+    setFlippedCards(new Set());
+  };
+
+  // 競技モード終了
+  const endCompetitionMode = () => {
+    const session = trainingGameManager.endSession();
+    if (session) {
+      performanceManager.updateSessionHistory(session);
+    }
+    setIsCompetitionMode(false);
+  };
+
+  // 競技用カードの取得
+  const getCompetitionCards = (): HyakuninIsshuCard[] => {
+    if (competitionLevel === 'mixed') {
+      return hyakuninIsshuData.slice(0, 20); // 混合の場合は20枚
+    } else {
+      const kimarijiCards = getCardsByKimarijiLength(competitionLevel);
+      return hyakuninIsshuData.filter(card => kimarijiCards.includes(card.id));
+    }
+  };
+
+  // 競技モードでのカード回答
+  const handleCompetitionAnswer = (cardId: number, correct: boolean) => {
+    const result = trainingGameManager.recordAnswer(cardId, correct);
+    performanceManager.recordTrainingResult(result);
+    
+    // 次のカードを設定
+    const remainingCards = displayCards.filter(card => card.id !== cardId);
+    if (remainingCards.length > 0) {
+      setDisplayCards(remainingCards);
+      const nextCard = remainingCards[0];
+      if (nextCard) {
+        trainingGameManager.setCurrentCard(nextCard);
+      }
+    } else {
+      // 全てのカードが完了
+      endCompetitionMode();
+    }
+  };
+
   if (!isInitialized) {
     return (
       <div style={{ 
@@ -224,6 +292,76 @@ export default function HomePage() {
             margin: '0 auto 16px'
           }}></div>
           <p style={{ color: '#6b7280' }}>百人一首データを読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 競技モード選択画面
+  if (isCompetitionMode && trainingGameManager.getCurrentState().currentPhase === 'setup') {
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        background: 'linear-gradient(135deg, #e3f2fd 0%, #e8eaf6 100%)',
+        padding: '16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div style={{ maxWidth: '600px', width: '100%' }}>
+          <h2 style={{
+            textAlign: 'center',
+            marginBottom: '24px',
+            color: '#1F2937',
+            fontSize: '24px',
+            fontWeight: '600'
+          }}>
+            競技トレーニングモード
+          </h2>
+          
+          <CompetitionModeSelect
+            onModeSelect={setCompetitionMode}
+            onKimarijiLevelSelect={setCompetitionLevel}
+            onSettingsChange={setCompetitionSettings}
+          />
+          
+          <div style={{
+            marginTop: '24px',
+            display: 'flex',
+            gap: '12px',
+            justifyContent: 'center'
+          }}>
+            <button
+              onClick={startCompetitionMode}
+              style={{
+                backgroundColor: '#3B82F6',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '12px 24px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+            >
+              開始
+            </button>
+            <button
+              onClick={() => setIsCompetitionMode(false)}
+              style={{
+                backgroundColor: '#6B7280',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '12px 24px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}
+            >
+              キャンセル
+            </button>
+          </div>
         </div>
       </div>
     );

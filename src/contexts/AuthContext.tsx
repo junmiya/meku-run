@@ -7,8 +7,6 @@ import {
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithPopup,
   sendPasswordResetEmail,
   updateProfile,
 } from 'firebase/auth';
@@ -47,7 +45,6 @@ interface AuthContextType {
   isLoggedIn: boolean;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   isAuthEnabled: boolean;
@@ -129,18 +126,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signInWithGoogle = async (): Promise<void> => {
-    if (!AUTH_ENABLED) {
-      throw new Error('認証機能が無効になっています');
-    }
-
-    try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      throw error;
-    }
-  };
 
   const signOut = async (): Promise<void> => {
     if (!AUTH_ENABLED) {
@@ -172,7 +157,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoggedIn: user !== null && !user.isAnonymous,
     signUp,
     signIn,
-    signInWithGoogle,
     signOut,
     resetPassword,
     isAuthEnabled: AUTH_ENABLED,

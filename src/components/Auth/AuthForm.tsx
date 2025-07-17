@@ -10,7 +10,7 @@ interface AuthFormProps {
 }
 
 const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
-  const { signIn, signUp, signInWithGoogle, resetPassword, loading } = useAuth();
+  const { signIn, signUp, resetPassword, loading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -68,15 +68,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode, onToggleMode }) => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      setError(null);
-      await signInWithGoogle();
-    } catch (err: any) {
-      console.error('Google auth error:', err);
-      setError(getErrorMessage(err.code || err.message));
-    }
-  };
 
   const getErrorMessage = (message: string): string => {
     const errorMessages: Record<string, string> = {
