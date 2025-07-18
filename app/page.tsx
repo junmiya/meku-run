@@ -1290,7 +1290,11 @@ function HyakuninIsshuApp() {
               }}>
                 <div style={{ fontSize: '14px', color: '#0c4a6e', marginBottom: '4px' }}>かかった時間</div>
                 <div style={{ fontSize: '28px', fontWeight: '700', color: '#0284c7' }}>
-                  {Math.floor((trainingEndTime - trainingStartTime) / 60000)}分 {Math.floor(((trainingEndTime - trainingStartTime) % 60000) / 1000)}秒
+                  {trainingEndTime && trainingStartTime ? (
+                    <>
+                      {Math.floor((trainingEndTime - trainingStartTime) / 60000)}分 {Math.floor(((trainingEndTime - trainingStartTime) % 60000) / 1000)}秒
+                    </>
+                  ) : '計測中...'}
                 </div>
               </div>
             </div>
