@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST='{"src/components/ClientProviders.tsx -> ../contexts/AuthContext":{"id":4362,"files":["static/chunks/bc9e92e6-20a43eedc6dbb5f8.js","static/chunks/7c86ec74-65975274b378cf57.js","static/chunks/943-338f28bb7ce3fc5e.js","static/chunks/362.04d6bab928ad1e6a.js"]}}';
+self.__REACT_LOADABLE_MANIFEST="{\"src/components/ClientProviders.tsx -> ../contexts/AuthContext\":{\"id\":\"src/components/ClientProviders.tsx -> ../contexts/AuthContext\",\"files\":[\"static/chunks/_app-pages-browser_src_contexts_AuthContext_tsx.js\"]}}"

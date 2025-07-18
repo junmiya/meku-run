@@ -7,7 +7,7 @@ import { memorizationManager } from '../src/managers/MemorizationManager';
 import { TrainingGameManager } from '../src/managers/TrainingGameManager';
 import { PerformanceManager } from '../src/managers/PerformanceManager';
 import { HyakuninIsshuCard } from '../src/types/WordCard';
-import { getCardsByKimarijiLength, getKimarijiInfo, debugKimarijiClassification } from '../src/data/kimariji-data';
+import { getCardsByKimarijiLength, getKimarijiInfo, debugKimarijiClassification, memorizeHelpers } from '../src/data/kimariji-data';
 import { Timer, CompetitionModeSelect } from '../src/components/Timer';
 import { AuthProvider, useAuth } from '../src/contexts/AuthContext';
 import ConditionalAuthGuard from '../src/components/Auth/ConditionalAuthGuard';
@@ -81,7 +81,20 @@ function HyakuninIsshuApp() {
   const [hiraganaMode, setHiraganaMode] = useState(false);
   const [kimarijiLengthFilter, setKimarijiLengthFilter] = useState<'all' | 1 | 2 | 3 | 4 | 5 | 6>('all');
   const [isTrainingMode, setIsTrainingMode] = useState(false);
-  const [currentTrainingType, setCurrentTrainingType] = useState<'oneChar' | 'twoChar' | 'threeChar' | 'mixed'>('oneChar');
+  const [selectedKimarijiLevels, setSelectedKimarijiLevels] = useState<Set<number>>(new Set([1]));
+  const [mixedTrainingMode, setMixedTrainingMode] = useState(false);
+  const [activeTrainingSession, setActiveTrainingSession] = useState(false);
+  const [currentTrainingCard, setCurrentTrainingCard] = useState<HyakuninIsshuCard | null>(null);
+  const [trainingCardIndex, setTrainingCardIndex] = useState(0);
+  const [trainingCards, setTrainingCards] = useState<HyakuninIsshuCard[]>([]);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [trainingScore, setTrainingScore] = useState({ correct: 0, total: 0 });
+  const [answerChoices, setAnswerChoices] = useState<HyakuninIsshuCard[]>([]);
+  const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
+  const [showResult, setShowResult] = useState(false);
+  const [trainingStartTime, setTrainingStartTime] = useState<number | null>(null);
+  const [trainingEndTime, setTrainingEndTime] = useState<number | null>(null);
+  const [showTrainingCompleteScreen, setShowTrainingCompleteScreen] = useState(false);
   
   // 競技モード関連の状態
   const [isCompetitionMode, setIsCompetitionMode] = useState(false);
@@ -108,6 +121,209 @@ function HyakuninIsshuApp() {
       setIsCompetitionMode(false);
     }
   }, [user, isLoggedIn, performanceManager, trainingGameManager, isTrainingMode, isCompetitionMode]);
+
+  // 決まり字レベル選択ハンドラ
+  const handleKimarijiLevelToggle = (level: number) => {
+    const newSelection = new Set(selectedKimarijiLevels);
+    if (newSelection.has(level)) {
+      newSelection.delete(level);
+    } else {
+      newSelection.add(level);
+    }
+    setSelectedKimarijiLevels(newSelection);
+    
+    // 混合モードは自動的に無効化
+    if (mixedTrainingMode) {
+      setMixedTrainingMode(false);
+    }
+  };
+
+  const handleMixedModeToggle = () => {
+    setMixedTrainingMode(!mixedTrainingMode);
+    // 混合モード有効時は個別選択をクリア
+    if (!mixedTrainingMode) {
+      setSelectedKimarijiLevels(new Set());
+    }
+  };
+
+  // 選択されたレベルから対象札を取得
+  const getTargetCardsForTraining = (): HyakuninIsshuCard[] => {
+    if (mixedTrainingMode) {
+      // 混合モード：全ての札を対象
+      return hyakuninIsshuData;
+    }
+    
+    if (selectedKimarijiLevels.size === 0) {
+      return [];
+    }
+    
+    // 選択されたレベルの札IDを収集
+    const targetCardIds = new Set<number>();
+    Array.from(selectedKimarijiLevels).forEach(level => {
+      const levelCards = getCardsByKimarijiLength(level);
+      levelCards.forEach(cardId => targetCardIds.add(cardId));
+    });
+    
+    // 札IDから実際の札データを取得
+    return hyakuninIsshuData.filter(card => targetCardIds.has(card.id));
+  };
+
+  // トレーニングセッション開始
+  const startTrainingSession = () => {
+    const targetCards = getTargetCardsForTraining();
+    
+    if (targetCards.length === 0) {
+      console.warn('対象となる札がありません');
+      return;
+    }
+    
+    console.log('トレーニング開始:', {
+      mode: mixedTrainingMode ? 'mixed' : 'selected',
+      selectedLevels: Array.from(selectedKimarijiLevels),
+      targetCardsCount: targetCards.length,
+      targetCards: targetCards.map(card => ({ id: card.id, kamiNoKu: card.kamiNoKu.slice(0, 10) + '...' }))
+    });
+    
+    // 開始時刻を記録
+    setTrainingStartTime(Date.now());
+    setTrainingEndTime(null);
+    setShowTrainingCompleteScreen(false);
+    
+    // TrainingGameManagerでセッション開始
+    trainingGameManager.startSession(
+      'memorization', // まずは暗記モードから開始
+      mixedTrainingMode ? 'mixed' : Array.from(selectedKimarijiLevels)[0] as any,
+      {
+        timeLimit: 300, // 5分
+        memorizationTime: 60, // 1分
+        judgeMode: 'normal'
+      }
+    );
+    
+    // トレーニング状態の初期化
+    const shuffledCards = [...targetCards].sort(() => Math.random() - 0.5); // シャッフル
+    setTrainingCards(shuffledCards);
+    const firstCard = shuffledCards.length > 0 ? shuffledCards[0]! : null;
+    setCurrentTrainingCard(firstCard);
+    setTrainingCardIndex(0);
+    setShowAnswer(false);
+    setTrainingScore({ correct: 0, total: 0 });
+    setSelectedChoice(null);
+    setShowResult(false);
+    
+    // 最初の問題の選択肢を生成
+    if (firstCard) {
+      setAnswerChoices(generateAnswerChoices(firstCard));
+    }
+    
+    // トレーニングモードを終了してセッション画面に移行
+    setIsTrainingMode(false);
+    setActiveTrainingSession(true);
+  };
+
+  // 選択肢を生成する関数
+  const generateAnswerChoices = (correctCard: HyakuninIsshuCard): HyakuninIsshuCard[] => {
+    // 正解以外のカードからランダムに3つ選択
+    const otherCards = hyakuninIsshuData.filter(card => card.id !== correctCard.id);
+    const shuffledOthers = [...otherCards].sort(() => Math.random() - 0.5);
+    const wrongChoices = shuffledOthers.slice(0, 3);
+    
+    // 正解と不正解を混ぜてシャッフル
+    const allChoices = [correctCard, ...wrongChoices];
+    return allChoices.sort(() => Math.random() - 0.5);
+  };
+
+  // 選択肢クリック時
+  const handleChoiceSelect = (choiceIndex: number) => {
+    if (selectedChoice !== null || !currentTrainingCard || choiceIndex >= answerChoices.length) return; // 既に選択済みまたはカードがない場合は無視
+    
+    setSelectedChoice(choiceIndex);
+    setShowResult(true);
+    
+    const selectedCard = answerChoices[choiceIndex];
+    if (!selectedCard) return; // カードが見つからない場合は無視
+    
+    const isCorrect = selectedCard.id === currentTrainingCard.id;
+    
+    // スコア更新
+    setTrainingScore(prev => ({
+      correct: prev.correct + (isCorrect ? 1 : 0),
+      total: prev.total + 1
+    }));
+    
+    // 1秒後に次の問題へ
+    setTimeout(() => {
+      nextTrainingCard();
+    }, 1000);
+  };
+
+  // トレーニング問題の回答表示
+  const showTrainingAnswer = () => {
+    setShowAnswer(true);
+  };
+
+  // 「覚えた」ボタンクリック時
+  const markTrainingCardAsKnown = () => {
+    if (currentTrainingCard) {
+      setTrainingScore(prev => ({ correct: prev.correct + 1, total: prev.total + 1 }));
+      nextTrainingCard();
+    }
+  };
+
+  // 「わからない」ボタンクリック時
+  const markTrainingCardAsUnknown = () => {
+    if (currentTrainingCard) {
+      setTrainingScore(prev => ({ correct: prev.correct, total: prev.total + 1 }));
+      nextTrainingCard();
+    }
+  };
+
+  // 次の問題へ
+  const nextTrainingCard = () => {
+    const nextIndex = trainingCardIndex + 1;
+    if (nextIndex < trainingCards.length) {
+      setTrainingCardIndex(nextIndex);
+      const nextCard = trainingCards[nextIndex]!;
+      setCurrentTrainingCard(nextCard);
+      setShowAnswer(false);
+      setSelectedChoice(null);
+      setShowResult(false);
+      
+      // 次の問題の選択肢を生成
+      setAnswerChoices(generateAnswerChoices(nextCard));
+    } else {
+      // トレーニング完了
+      endTrainingSession();
+    }
+  };
+
+  // トレーニングセッション終了
+  const endTrainingSession = () => {
+    // 終了時刻を記録
+    setTrainingEndTime(Date.now());
+    
+    const session = trainingGameManager.endSession();
+    if (session) {
+      performanceManager.updateSessionHistory(session);
+    }
+    
+    // 完了画面を表示
+    setShowTrainingCompleteScreen(true);
+    
+    // セッション状態をリセット（トレーニングモードとスコアは維持）
+    setActiveTrainingSession(false);
+    setCurrentTrainingCard(null);
+    setTrainingCardIndex(0);
+    setTrainingCards([]);
+    setShowAnswer(false);
+    setAnswerChoices([]);
+    setSelectedChoice(null);
+    setShowResult(false);
+    
+    // 元の表示に戻す
+    setCards(hyakuninIsshuData);
+    setDisplayCards(hyakuninIsshuData.slice(0, cardsPerPage));
+  };
 
   // 初期化
   useEffect(() => {
@@ -429,40 +645,43 @@ function HyakuninIsshuApp() {
             }}>
               <button
                 onClick={() => {
-                  setIsTrainingMode(false);
-                  setIsCompetitionMode(false);
+                  if (!showTrainingCompleteScreen) {
+                    setIsTrainingMode(false);
+                    setIsCompetitionMode(false);
+                  }
                 }}
+                disabled={showTrainingCompleteScreen}
                 style={{
-                  backgroundColor: !isTrainingMode && !isCompetitionMode ? '#3b82f6' : 'transparent',
-                  color: !isTrainingMode && !isCompetitionMode ? 'white' : '#6b7280',
+                  backgroundColor: !isTrainingMode && !isCompetitionMode && !showTrainingCompleteScreen ? '#3b82f6' : 'transparent',
+                  color: !isTrainingMode && !isCompetitionMode && !showTrainingCompleteScreen ? 'white' : '#6b7280',
                   padding: '8px 16px',
                   borderRadius: '4px',
                   border: 'none',
                   cursor: 'pointer',
                   fontSize: '14px',
-                  fontWeight: !isTrainingMode && !isCompetitionMode ? '600' : '400'
+                  fontWeight: !isTrainingMode && !isCompetitionMode && !showTrainingCompleteScreen ? '600' : '400'
                 }}
               >
                 通常モード
               </button>
               <button
                 onClick={() => {
-                  if (isLoggedIn) {
+                  if (isLoggedIn && !showTrainingCompleteScreen) {
                     setIsTrainingMode(true);
                     setIsCompetitionMode(false);
                   }
                 }}
-                disabled={!isLoggedIn}
+                disabled={!isLoggedIn || showTrainingCompleteScreen}
                 title={!isLoggedIn ? "ログインが必要です" : ""}
                 style={{
-                  backgroundColor: isTrainingMode && !isCompetitionMode ? '#3b82f6' : 'transparent',
-                  color: !isLoggedIn ? '#9ca3af' : (isTrainingMode && !isCompetitionMode ? 'white' : '#6b7280'),
+                  backgroundColor: (isTrainingMode || showTrainingCompleteScreen) && !isCompetitionMode ? '#3b82f6' : 'transparent',
+                  color: !isLoggedIn ? '#9ca3af' : ((isTrainingMode || showTrainingCompleteScreen) && !isCompetitionMode ? 'white' : '#6b7280'),
                   padding: '8px 16px',
                   borderRadius: '4px',
                   border: 'none',
                   cursor: isLoggedIn ? 'pointer' : 'not-allowed',
                   fontSize: '14px',
-                  fontWeight: isTrainingMode && !isCompetitionMode ? '600' : '400',
+                  fontWeight: (isTrainingMode || showTrainingCompleteScreen) && !isCompetitionMode ? '600' : '400',
                   opacity: isLoggedIn ? 1 : 0.5,
                   transition: 'all 0.2s ease',
                   position: 'relative'
@@ -490,12 +709,12 @@ function HyakuninIsshuApp() {
               </button>
               <button
                 onClick={() => {
-                  if (isLoggedIn) {
+                  if (isLoggedIn && !showTrainingCompleteScreen) {
                     setIsTrainingMode(false);
                     setIsCompetitionMode(true);
                   }
                 }}
-                disabled={!isLoggedIn}
+                disabled={!isLoggedIn || showTrainingCompleteScreen}
                 title={!isLoggedIn ? "ログインが必要です" : ""}
                 style={{
                   backgroundColor: isCompetitionMode ? '#10b981' : 'transparent',
@@ -824,120 +1043,130 @@ function HyakuninIsshuApp() {
               基礎トレーニング
             </h2>
             
-            {/* トレーニングメニュー */}
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-              gap: '16px',
-              marginBottom: '24px'
-            }}>
-              <div 
-                onClick={() => setCurrentTrainingType('oneChar')}
-                style={{ 
-                  backgroundColor: currentTrainingType === 'oneChar' ? '#e0f2fe' : '#f8fafc',
-                  border: currentTrainingType === 'oneChar' ? '2px solid #0284c7' : '2px solid #e2e8f0',
-                  borderRadius: '8px', 
-                  padding: '20px', 
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <h3 style={{ 
-                  fontSize: '1.125rem', 
-                  fontWeight: '600', 
-                  color: '#1f2937', 
-                  marginBottom: '8px' 
-                }}>
-                  1字決まり練習
-                </h3>
-                <p style={{ 
-                  color: '#6b7280', 
-                  fontSize: '0.875rem',
-                  marginBottom: '8px'
-                }}>
-                  最も覚えやすい1字で決まる札から開始
-                </p>
-                <div style={{ 
-                  fontSize: '0.75rem', 
-                  color: '#059669',
-                  fontWeight: '500'
-                }}>
-                  推奨: 初心者
-                </div>
+            {/* 決まり字レベル選択 */}
+            <div style={{ marginBottom: '24px' }}>
+              <h3 style={{ 
+                fontSize: '1.125rem', 
+                fontWeight: '600', 
+                color: '#1f2937', 
+                marginBottom: '16px' 
+              }}>
+                🎯 練習する決まり字レベルを選択してください
+              </h3>
+              
+              {/* 個別レベル選択 */}
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+                gap: '12px',
+                marginBottom: '20px'
+              }}>
+                {[1, 2, 3, 4, 5, 6].map(level => {
+                  const helper = level === 1 ? memorizeHelpers.oneChar :
+                                level === 2 ? memorizeHelpers.twoChar :
+                                level === 3 ? memorizeHelpers.threeChar :
+                                level === 4 ? memorizeHelpers.fourChar :
+                                level === 5 ? memorizeHelpers.fiveChar :
+                                memorizeHelpers.sixChar;
+                  
+                  const isSelected = selectedKimarijiLevels.has(level);
+                  
+                  return (
+                    <label 
+                      key={level}
+                      style={{ 
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '12px',
+                        backgroundColor: isSelected ? '#e0f2fe' : '#f8fafc',
+                        border: isSelected ? '2px solid #0284c7' : '2px solid #e2e8f0',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        opacity: mixedTrainingMode ? 0.5 : 1
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleKimarijiLevelToggle(level)}
+                        disabled={mixedTrainingMode}
+                        style={{ 
+                          marginRight: '12px',
+                          width: '16px',
+                          height: '16px',
+                          cursor: 'pointer'
+                        }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ 
+                          fontSize: '14px', 
+                          fontWeight: '600', 
+                          color: '#1f2937',
+                          marginBottom: '4px'
+                        }}>
+                          {level}字決まり ({'totalCount' in helper ? helper.totalCount : helper.cards?.length || 0}首)
+                        </div>
+                        <div style={{ 
+                          fontSize: '12px', 
+                          color: '#6b7280' 
+                        }}>
+                          {helper.explanation}
+                          {level === 1 && ' - むすめふさほせ'}
+                        </div>
+                      </div>
+                    </label>
+                  );
+                })}
               </div>
               
-              <div 
-                onClick={() => setCurrentTrainingType('twoChar')}
-                style={{ 
-                  backgroundColor: currentTrainingType === 'twoChar' ? '#e0f2fe' : '#f8fafc',
-                  border: currentTrainingType === 'twoChar' ? '2px solid #0284c7' : '2px solid #e2e8f0',
-                  borderRadius: '8px', 
-                  padding: '20px', 
+              {/* 混合モード */}
+              <div style={{ 
+                borderTop: '1px solid #e2e8f0',
+                paddingTop: '16px'
+              }}>
+                <label style={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '16px',
+                  backgroundColor: mixedTrainingMode ? '#fef3c7' : '#f8fafc',
+                  border: mixedTrainingMode ? '2px solid #f59e0b' : '2px solid #e2e8f0',
+                  borderRadius: '8px',
                   cursor: 'pointer',
                   transition: 'all 0.2s ease'
-                }}
-              >
-                <h3 style={{ 
-                  fontSize: '1.125rem', 
-                  fontWeight: '600', 
-                  color: '#1f2937', 
-                  marginBottom: '8px' 
                 }}>
-                  2字決まり練習
-                </h3>
-                <p style={{ 
-                  color: '#6b7280', 
-                  fontSize: '0.875rem',
-                  marginBottom: '8px'
-                }}>
-                  標準的な2字で決まる札の習得
-                </p>
-                <div style={{ 
-                  fontSize: '0.75rem', 
-                  color: '#d97706',
-                  fontWeight: '500'
-                }}>
-                  推奨: 中級者
-                </div>
-              </div>
-              
-              <div 
-                onClick={() => setCurrentTrainingType('threeChar')}
-                style={{ 
-                  backgroundColor: currentTrainingType === 'threeChar' ? '#e0f2fe' : '#f8fafc',
-                  border: currentTrainingType === 'threeChar' ? '2px solid #0284c7' : '2px solid #e2e8f0',
-                  borderRadius: '8px', 
-                  padding: '20px', 
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <h3 style={{ 
-                  fontSize: '1.125rem', 
-                  fontWeight: '600', 
-                  color: '#1f2937', 
-                  marginBottom: '8px' 
-                }}>
-                  3字以上決まり練習
-                </h3>
-                <p style={{ 
-                  color: '#6b7280', 
-                  fontSize: '0.875rem',
-                  marginBottom: '8px'
-                }}>
-                  難しい決まり字の上級練習
-                </p>
-                <div style={{ 
-                  fontSize: '0.75rem', 
-                  color: '#dc2626',
-                  fontWeight: '500'
-                }}>
-                  推奨: 上級者
-                </div>
+                  <input
+                    type="checkbox"
+                    checked={mixedTrainingMode}
+                    onChange={handleMixedModeToggle}
+                    style={{ 
+                      marginRight: '12px',
+                      width: '16px',
+                      height: '16px',
+                      cursor: 'pointer'
+                    }}
+                  />
+                  <div>
+                    <div style={{ 
+                      fontSize: '16px', 
+                      fontWeight: '600', 
+                      color: '#1f2937',
+                      marginBottom: '4px'
+                    }}>
+                      🎲 混合モード - 全レベルランダム出題
+                    </div>
+                    <div style={{ 
+                      fontSize: '14px', 
+                      color: '#6b7280' 
+                    }}>
+                      1〜6字決まりから均等にランダム出題（全100首対象）
+                    </div>
+                  </div>
+                </label>
               </div>
             </div>
             
-            {/* 選択されたトレーニングの詳細 */}
+            {/* 練習開始セクション */}
             <div style={{ 
               backgroundColor: '#f1f5f9', 
               borderRadius: '8px', 
@@ -950,46 +1179,173 @@ function HyakuninIsshuApp() {
                 color: '#1f2937', 
                 marginBottom: '12px' 
               }}>
-                {currentTrainingType === 'oneChar' && '1字決まり練習'}
-                {currentTrainingType === 'twoChar' && '2字決まり練習'}
-                {currentTrainingType === 'threeChar' && '3字以上決まり練習'}
+                {mixedTrainingMode 
+                  ? '🎲 混合モード練習' 
+                  : `📚 選択レベル練習 (${selectedKimarijiLevels.size}レベル)`
+                }
               </h3>
               <p style={{ 
                 color: '#6b7280', 
                 marginBottom: '16px' 
               }}>
-                {currentTrainingType === 'oneChar' && '「む・す・め・ふ・さ・ほ・せ」の7首を完全習得するまで反復練習します。'}
-                {currentTrainingType === 'twoChar' && '2字で決まる札を段階的に習得します。最も一般的な決まり字パターンです。'}
-                {currentTrainingType === 'threeChar' && '3字以上で決まる札の習得です。上級者向けの難しい決まり字です。'}
+                {mixedTrainingMode 
+                  ? '全ての決まり字レベルからランダムに問題を出題します。総合的な実力向上を目指します。'
+                  : selectedKimarijiLevels.size === 0 
+                    ? '練習するレベルを選択してください。複数選択も可能です。'
+                    : `選択した ${Array.from(selectedKimarijiLevels).join('・')} 字決まりレベルから問題を出題します。`
+                }
               </p>
               <button
+                onClick={startTrainingSession}
+                disabled={!mixedTrainingMode && selectedKimarijiLevels.size === 0}
+                style={{
+                  backgroundColor: (!mixedTrainingMode && selectedKimarijiLevels.size === 0) ? '#9ca3af' : '#3b82f6',
+                  color: 'white',
+                  padding: '12px 24px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: (!mixedTrainingMode && selectedKimarijiLevels.size === 0) ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600'
+                }}
+              >
+                {mixedTrainingMode || selectedKimarijiLevels.size > 0 ? '練習開始' : 'レベルを選択してください'}
+              </button>
+            </div>
+            </div>
+          </ConditionalAuthGuard>
+        ) : showTrainingCompleteScreen ? (
+          // トレーニング完了画面
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            padding: '48px',
+            textAlign: 'center',
+            maxWidth: '600px',
+            margin: '0 auto'
+          }}>
+            <div style={{
+              fontSize: '48px',
+              marginBottom: '24px'
+            }}>
+              🎉
+            </div>
+            <h2 style={{
+              fontSize: '1.875rem',
+              fontWeight: '700',
+              color: '#1f2937',
+              marginBottom: '16px'
+            }}>
+              トレーニング完了！
+            </h2>
+            <div style={{
+              backgroundColor: '#f3f4f6',
+              borderRadius: '8px',
+              padding: '24px',
+              marginBottom: '24px'
+            }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                gap: '16px',
+                marginBottom: '16px'
+              }}>
+                <div style={{
+                  backgroundColor: '#dcfce7',
+                  padding: '12px',
+                  borderRadius: '6px'
+                }}>
+                  <div style={{ fontSize: '12px', color: '#166534', marginBottom: '4px' }}>正解数</div>
+                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#166534' }}>
+                    {trainingScore.correct}
+                  </div>
+                </div>
+                <div style={{
+                  backgroundColor: '#e0f2fe',
+                  padding: '12px',
+                  borderRadius: '6px'
+                }}>
+                  <div style={{ fontSize: '12px', color: '#0c4a6e', marginBottom: '4px' }}>総問題数</div>
+                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#0c4a6e' }}>
+                    {trainingScore.total}
+                  </div>
+                </div>
+                <div style={{
+                  backgroundColor: '#fef3c7',
+                  padding: '12px',
+                  borderRadius: '6px'
+                }}>
+                  <div style={{ fontSize: '12px', color: '#a16207', marginBottom: '4px' }}>正解率</div>
+                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#a16207' }}>
+                    {trainingScore.total > 0 ? Math.round((trainingScore.correct / trainingScore.total) * 100) : 0}%
+                  </div>
+                </div>
+              </div>
+              <div style={{
+                backgroundColor: '#e0f2fe',
+                padding: '16px',
+                borderRadius: '8px',
+                border: '2px solid #0284c7'
+              }}>
+                <div style={{ fontSize: '14px', color: '#0c4a6e', marginBottom: '4px' }}>かかった時間</div>
+                <div style={{ fontSize: '28px', fontWeight: '700', color: '#0284c7' }}>
+                  {Math.floor((trainingEndTime - trainingStartTime) / 60000)}分 {Math.floor(((trainingEndTime - trainingStartTime) % 60000) / 1000)}秒
+                </div>
+              </div>
+            </div>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              gap: '16px',
+              flexWrap: 'wrap'
+            }}>
+              <button
                 onClick={() => {
-                  // トレーニング開始処理
-                  setIsTrainingMode(false);
-                  if (currentTrainingType === 'oneChar') {
-                    handleKimarijiLengthChange(1);
-                  } else if (currentTrainingType === 'twoChar') {
-                    handleKimarijiLengthChange(2);
-                  } else if (currentTrainingType === 'threeChar') {
-                    handleKimarijiLengthChange(3);
-                  }
+                  // 完了画面を閉じてトレーニングモードに戻る
+                  setShowTrainingCompleteScreen(false);
+                  setIsTrainingMode(true);
+                  setTrainingStartTime(null);
+                  setTrainingEndTime(null);
+                  setTrainingScore({ correct: 0, total: 0 });
                 }}
                 style={{
                   backgroundColor: '#3b82f6',
                   color: 'white',
                   padding: '12px 24px',
-                  borderRadius: '6px',
+                  borderRadius: '8px',
                   border: 'none',
                   cursor: 'pointer',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   fontWeight: '600'
                 }}
               >
-                練習開始
+                もう一度練習
+              </button>
+              <button
+                onClick={() => {
+                  // 完了画面を閉じて通常モードに戻る
+                  setShowTrainingCompleteScreen(false);
+                  setIsTrainingMode(false);
+                  setTrainingStartTime(null);
+                  setTrainingEndTime(null);
+                  setTrainingScore({ correct: 0, total: 0 });
+                }}
+                style={{
+                  backgroundColor: '#6b7280',
+                  color: 'white',
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontWeight: '600'
+                }}
+              >
+                通常モードに戻る
               </button>
             </div>
-            </div>
-          </ConditionalAuthGuard>
+          </div>
         ) : (
           // 通常モード
           displayCards.length === 0 ? (
@@ -1008,15 +1364,277 @@ function HyakuninIsshuApp() {
             </div>
           ) : (
             <>
-              {/* カードグリッド */}
-              <div style={{ 
-                display: 'flex',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                gap: '12px',
-                maxWidth: '1200px', 
-                margin: '0 auto'
-              }}>
+              {/* トレーニングセッション画面 */}
+              {activeTrainingSession && currentTrainingCard && (
+                <div style={{
+                  backgroundColor: '#f8fafc',
+                  border: '2px solid #3b82f6',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  marginBottom: '24px',
+                  maxWidth: '800px',
+                  margin: '0 auto 24px auto'
+                }}>
+                  {/* ヘッダー情報 */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '20px',
+                    padding: '12px',
+                    backgroundColor: '#e0f2fe',
+                    borderRadius: '8px'
+                  }}>
+                    <div style={{
+                      fontSize: '18px',
+                      fontWeight: '600',
+                      color: '#0f172a'
+                    }}>
+                      🎯 トレーニング問題
+                    </div>
+                    <div style={{
+                      fontSize: '14px',
+                      color: '#64748b'
+                    }}>
+                      {trainingCardIndex + 1} / {trainingCards.length} 問目
+                    </div>
+                  </div>
+
+                  {/* 進捗バー */}
+                  <div style={{
+                    backgroundColor: '#e2e8f0',
+                    borderRadius: '8px',
+                    height: '8px',
+                    marginBottom: '24px',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      backgroundColor: '#3b82f6',
+                      height: '100%',
+                      width: `${((trainingCardIndex + 1) / trainingCards.length) * 100}%`,
+                      borderRadius: '8px',
+                      transition: 'width 0.3s ease'
+                    }} />
+                  </div>
+
+                  {/* スコア表示 */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '24px',
+                    marginBottom: '24px'
+                  }}>
+                    <div style={{
+                      textAlign: 'center',
+                      padding: '8px 16px',
+                      backgroundColor: '#dcfce7',
+                      borderRadius: '6px'
+                    }}>
+                      <div style={{ fontSize: '12px', color: '#166534' }}>正解</div>
+                      <div style={{ fontSize: '18px', fontWeight: '600', color: '#166534' }}>
+                        {trainingScore.correct}
+                      </div>
+                    </div>
+                    <div style={{
+                      textAlign: 'center',
+                      padding: '8px 16px',
+                      backgroundColor: '#f3f4f6',
+                      borderRadius: '6px'
+                    }}>
+                      <div style={{ fontSize: '12px', color: '#374151' }}>総問題数</div>
+                      <div style={{ fontSize: '18px', fontWeight: '600', color: '#374151' }}>
+                        {trainingScore.total}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 問題表示 */}
+                  <div style={{
+                    backgroundColor: '#ffffff',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '12px',
+                    padding: '32px',
+                    marginBottom: '24px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{
+                      fontSize: '14px',
+                      color: '#6b7280',
+                      marginBottom: '12px'
+                    }}>
+                      この上の句に続く下の句を選んでください
+                    </div>
+                    
+                    {/* 上の句表示（決まり字付き） */}
+                    <div style={{
+                      backgroundColor: '#f8fafc',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      padding: '24px',
+                      marginBottom: '24px'
+                    }}>
+                      <div style={{
+                        fontSize: '24px',
+                        lineHeight: '1.6',
+                        color: '#1f2937',
+                        marginBottom: '16px',
+                        fontFamily: 'serif',
+                        writingMode: 'horizontal-tb', // 常に横表示
+                        textAlign: 'center',
+                        minHeight: 'auto',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        {hiraganaMode ? currentTrainingCard.reading.kamiNoKu : currentTrainingCard.kamiNoKu}
+                      </div>
+                      
+                      {/* 決まり字表示（大きく） */}
+                      <div style={{
+                        fontSize: '24px', // 大きくした
+                        color: '#dc2626',
+                        backgroundColor: '#fef2f2',
+                        padding: '12px 20px', // パディングも大きく
+                        borderRadius: '8px',
+                        border: '2px solid #dc2626',
+                        display: 'inline-block',
+                        fontWeight: '700', // より太く
+                        marginTop: '8px'
+                      }}>
+                        決まり字：{getKimarijiInfo(currentTrainingCard.id)?.pattern || currentTrainingCard.reading.kamiNoKu.replace(/\s+/g, '').substring(0, 3)}
+                      </div>
+                    </div>
+
+                    {/* 選択肢表示 */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: '16px',
+                      marginBottom: '16px'
+                    }}>
+                      {answerChoices.map((choice, index) => {
+                        const isSelected = selectedChoice === index;
+                        const isCorrect = choice.id === currentTrainingCard.id;
+                        const showResultColors = showResult && isSelected;
+                        
+                        return (
+                          <button
+                            key={choice.id}
+                            onClick={() => handleChoiceSelect(index)}
+                            disabled={selectedChoice !== null}
+                            style={{
+                              backgroundColor: showResultColors
+                                ? (isCorrect ? '#dcfce7' : '#fef2f2')
+                                : (isSelected ? '#e0f2fe' : '#ffffff'),
+                              border: showResultColors
+                                ? (isCorrect ? '2px solid #059669' : '2px solid #dc2626')
+                                : (isSelected ? '2px solid #3b82f6' : '2px solid #e5e7eb'),
+                              borderRadius: '8px',
+                              padding: '12px',
+                              cursor: selectedChoice !== null ? 'default' : 'pointer',
+                              fontSize: '16px',
+                              lineHeight: '1.5',
+                              textAlign: 'center',
+                              fontFamily: 'serif',
+                              height: '180px', // 固定高さ
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: showResultColors
+                                ? (isCorrect ? '#059669' : '#dc2626')
+                                : '#1f2937',
+                              transition: 'all 0.2s ease',
+                              opacity: selectedChoice !== null && !isSelected ? 0.5 : 1,
+                              fontWeight: showResultColors ? '600' : '400'
+                            }}
+                          >
+                            <div style={{
+                              writingMode: 'vertical-rl',
+                              textOrientation: 'upright',
+                              height: '160px', // 固定高さで中心配置を安定化
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              lineHeight: '1.8',
+                              width: '100%',
+                              whiteSpace: 'pre-line' // 改行を有効にする
+                            }}>
+                              {choice.reading.shimoNoKu.replace(/\s+/g, '\n')}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* 結果表示 */}
+                    {showResult && selectedChoice !== null && answerChoices[selectedChoice] && (
+                      <div style={{
+                        padding: '12px',
+                        borderRadius: '6px',
+                        backgroundColor: answerChoices[selectedChoice].id === currentTrainingCard.id ? '#dcfce7' : '#fef2f2',
+                        border: answerChoices[selectedChoice].id === currentTrainingCard.id ? '1px solid #059669' : '1px solid #dc2626',
+                        color: answerChoices[selectedChoice].id === currentTrainingCard.id ? '#059669' : '#dc2626',
+                        fontWeight: '600',
+                        fontSize: '14px'
+                      }}>
+                        {answerChoices[selectedChoice].id === currentTrainingCard.id ? '✓ 正解！' : '✗ 不正解'}
+                        {answerChoices[selectedChoice].id !== currentTrainingCard.id && (
+                          <div style={{ fontSize: '12px', marginTop: '4px', fontWeight: '400' }}>
+                            正解：{currentTrainingCard.reading.shimoNoKu}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 操作ボタン */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    gap: '12px',
+                    flexWrap: 'wrap'
+                  }}>
+                    {showResult && (
+                      <div style={{
+                        fontSize: '14px',
+                        color: '#6b7280',
+                        padding: '8px 16px',
+                        fontStyle: 'italic'
+                      }}>
+                        1秒後に次の問題に進みます...
+                      </div>
+                    )}
+                    
+                    <button
+                      onClick={endTrainingSession}
+                      style={{
+                        backgroundColor: '#6b7280',
+                        color: 'white',
+                        padding: '12px 24px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        minWidth: '120px'
+                      }}
+                    >
+                      セッション終了
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {/* カードグリッド（トレーニングセッション中は非表示） */}
+              {!activeTrainingSession && (
+                <div style={{ 
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                  gap: '12px',
+                  maxWidth: '1200px', 
+                  margin: '0 auto'
+                }}>
                 {displayCards.map((card) => (
                 <div
                   key={card.id}
@@ -1234,6 +1852,7 @@ function HyakuninIsshuApp() {
                 </div>
               ))}
               </div>
+              )}
             </>
           )
         )}

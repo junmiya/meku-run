@@ -1,16 +1,3 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/card-test/page": "app/card-test/page.js",
-  "/emergency/page": "app/emergency/page.js",
-  "/debug/page": "app/debug/page.js",
-  "/hyakunin-test/page": "app/hyakunin-test/page.js",
-  "/layout-test/page": "app/layout-test/page.js",
-  "/fixed-main/page": "app/fixed-main/page.js",
-  "/page": "app/page.js",
-  "/simple-test/page": "app/simple-test/page.js",
-  "/simple-layout/page": "app/simple-layout/page.js",
-  "/test-emergency/page": "app/test-emergency/page.js",
-  "/test-fix/page": "app/test-fix/page.js",
-  "/working-test/page": "app/working-test/page.js",
-  "/test-simple/page": "app/test-simple/page.js"
+  "/page": "app/page.js"
 }
